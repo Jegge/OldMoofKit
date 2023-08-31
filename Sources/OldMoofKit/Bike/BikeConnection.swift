@@ -36,13 +36,13 @@ public class BikeConnection: NSObject {
 
     var isConnected: Bool { return self.connection?.isConnected ?? false }
 
-    private (set) var lock: Lock = .locked {
+    private (set) public var lock: Lock = .locked {
         didSet {
             self.delegate?.bikeConnection(self, didChangeLocked: self.lock)
         }
     }
 
-    private (set) var alarm: Alarm? {
+    private (set) public var alarm: Alarm? {
         didSet {
             if let alarm = self.alarm {
                 self.delegate?.bikeConnection(self, didChangeAlarm: alarm)
@@ -50,33 +50,33 @@ public class BikeConnection: NSObject {
         }
     }
 
-    private (set) var lighting: Lighting = .off {
+    private (set) public var lighting: Lighting = .off {
         didSet {
             self.delegate?.bikeConnection(self, didChangeLighting: self.lighting)
         }
     }
 
-    private (set) var batteryLevel: Int = 0 {
+    private (set) public var batteryLevel: Int = 0 {
         didSet {
             self.delegate?.bikeConnection(self, didChangeBatteryLevel: self.batteryLevel)
         }
     }
 
-    private (set) var batteryState: BatteryState = .discharging {
+    private (set) public var batteryState: BatteryState = .discharging {
         didSet {
             self.delegate?.bikeConnection(self, didChangeBatteryState: self.batteryState)
         }
     }
 
-    private (set) var moduleState: ModuleState = .off {
+    private (set) public var moduleState: ModuleState = .off {
         didSet {
             self.delegate?.bikeConnection(self, didChangeModuleState: self.moduleState)
         }
     }
 
-    private (set) var errorCode: ErrorCode = ErrorCode()
+    private (set) public var errorCode: ErrorCode = ErrorCode()
 
-    private (set) var motorAssistance: MotorAssistance? {
+    private (set) public var motorAssistance: MotorAssistance? {
         didSet {
             if let motorAssistance = self.motorAssistance {
                 self.delegate?.bikeConnection(self, didChangeMotorAssistance: motorAssistance)
@@ -84,25 +84,25 @@ public class BikeConnection: NSObject {
         }
     }
 
-    private (set) var mutedSounds: MutedSounds = [] {
+    private (set) public var mutedSounds: MutedSounds = [] {
         didSet {
             self.delegate?.bikeConnection(self, didChangeMutedSounds: self.mutedSounds)
         }
     }
 
-    private (set) var speed: Int = 0 {
+    private (set) public var speed: Int = 0 {
         didSet {
             self.delegate?.bikeConnection(self, didChangeSpeed: self.speed)
         }
     }
 
-    private (set) var distance: Double = 0 {
+    private (set) public var distance: Double = 0 {
         didSet {
             self.delegate?.bikeConnection(self, didChangeDistance: self.distance)
         }
     }
 
-    private (set) var region: Region? {
+    private (set) public var region: Region? {
         didSet {
            if let region = self.region {
                 self.delegate?.bikeConnection(self, didChangeRegion: region)
@@ -110,7 +110,7 @@ public class BikeConnection: NSObject {
         }
     }
 
-    private (set) var unit: Unit? {
+    private (set) public var unit: Unit? {
         didSet {
             if let unit = self.unit {
                 self.delegate?.bikeConnection(self, didChangeUnit: unit)
@@ -118,7 +118,7 @@ public class BikeConnection: NSObject {
         }
     }
 
-    private (set) var parameters: Parameters? {
+    private (set) public var parameters: Parameters? {
         didSet {
             if let parameters = self.parameters {
                 DispatchQueue.main.async {
@@ -142,7 +142,7 @@ public class BikeConnection: NSObject {
 
     private var connection: BluetoothConnection?
 
-    weak var delegate: BikeConnectionDelegate?
+    public weak var delegate: BikeConnectionDelegate?
 
     public init (identifier: UUID, key: Data, profile name: String, proximityUnlock: Bool, motionUnlock: Bool) throws {
         guard let profile = Profiles.profile(named: name) else {
@@ -242,7 +242,7 @@ public class BikeConnection: NSObject {
         try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.key))
     }
 
-    func wakeup () async throws {
+    public func wakeup () async throws {
         if self.moduleState == .standby {
             print("Waking the bike up!")
             try await self.writeRequest(self.profile.createModuleStateWriteRequest(value: .on))
@@ -250,51 +250,51 @@ public class BikeConnection: NSObject {
         }
     }
 
-    func setLocked (_ value: Lock) async throws {
+    public func setLocked (_ value: Lock) async throws {
         print("Setting lock to \("\(value)")")
         try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
     }
 
-    func setLighting (_ value: Lighting) async throws {
+    public func setLighting (_ value: Lighting) async throws {
         print("Setting lighting to \("\(value)")")
         try await self.writeRequest(self.profile.createLightingWriteRequest(value: value))
     }
 
-    func setAlarm (_ value: Alarm) async throws {
+    public func setAlarm (_ value: Alarm) async throws {
         print("Setting alarm to \("\(value)")")
         try await self.writeRequest(self.profile.createAlarmWriteRequest(value: value))
     }
 
-    func setMotorAssistance (_ value: MotorAssistance) async throws {
+    public func setMotorAssistance (_ value: MotorAssistance) async throws {
         print("Setting motor assistance to \("\(value)")")
         if let region = self.region {
             try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: value, region: region))
         }
     }
 
-    func setRegion (_ value: Region) async throws {
+    public func setRegion (_ value: Region) async throws {
         print("Setting region to \("\(value)")")
         if let motorAssistance = self.motorAssistance {
             try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: motorAssistance, region: value))
         }
     }
 
-    func setUnit (_ value: Unit) async throws {
+    public func setUnit (_ value: Unit) async throws {
         print("Setting unit to \("\(value)")")
         try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
     }
 
-    func setMuteState(_ value: MutedSounds) async throws {
+    public func setMuteState(_ value: MutedSounds) async throws {
         print("Setting muted sounds to \(value.description)")
         try await self.writeRequest(self.profile.createMutedSoundsWriteRequest(value: value))
     }
 
-    func playSound (_ sound: Sound, repeat count: UInt8 = 1) async throws {
+    public func playSound (_ sound: Sound, repeat count: UInt8 = 1) async throws {
         print("Playing sound \("\(sound)") \(count) times.")
         try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
     }
 
-    func setBackupCode (_ code: Int) async throws {
+    public func setBackupCode (_ code: Int) async throws {
         if code < 111 || code > 999 {
             throw BikeConnectionError.codeOutOfRange
         }
@@ -302,11 +302,11 @@ public class BikeConnection: NSObject {
         try await self.writeRequest(self.profile.createBackupCodeWriteRequest(code: code))
     }
 
-    func connect () {
+    public func connect () {
         self.connection = BluetoothConnection(delegate: self, identifier: self.identifier, reconnectInterval: 1)
     }
 
-    func disconnect () {
+    public func disconnect () {
         self.connection?.disconnectPeripheral()
         self.connection?.delegate = nil
         self.connection = nil
@@ -314,12 +314,12 @@ public class BikeConnection: NSObject {
 }
 
 extension BikeConnection: BluetoothConnectionDelegate {
-    func bluetoothConnection (_ connection: BluetoothConnection, failed error: Error) {
+    internal func bluetoothConnection (_ connection: BluetoothConnection, failed error: Error) {
         print("Connection failed with error \(error)")
         self.delegate?.bikeConnection(self, failed: error)
     }
 
-    func bluetoothDidConnect (_ connection: BluetoothConnection) {
+    internal func bluetoothDidConnect (_ connection: BluetoothConnection) {
         Task {
             do {
                 print("Connected")
