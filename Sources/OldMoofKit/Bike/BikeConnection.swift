@@ -27,7 +27,7 @@ public protocol BikeConnectionDelegate: AnyObject {
 
 public class BikeConnection: NSObject {
 
-    let bike: Bike
+    public let bike: Bike
 
     public var proximityUnlock: Bool
     public var motionUnlock: Bool
