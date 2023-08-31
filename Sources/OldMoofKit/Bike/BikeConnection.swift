@@ -27,14 +27,14 @@ public protocol BikeConnectionDelegate: AnyObject {
 
 public class BikeConnection: NSObject {
 
-    let identifier: UUID
-    let key: Data
-    let profile: Profile
+    private let identifier: UUID
+    private let key: Data
+    private let profile: Profile
 
-    var proximityUnlock: Bool
-    var motionUnlock: Bool
+    public var proximityUnlock: Bool
+    public var motionUnlock: Bool
 
-    var isConnected: Bool { return self.connection?.isConnected ?? false }
+    public var isConnected: Bool { return self.connection?.isConnected ?? false }
 
     private (set) public var lock: Lock = .locked {
         didSet {
