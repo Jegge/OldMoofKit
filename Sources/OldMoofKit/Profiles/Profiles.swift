@@ -36,4 +36,8 @@ public struct Profiles {
     public static func hardwareFor(_ name: String) -> Hardware {
         return self.profile(named: name)?.hardware ?? []
     }
+
+    public static func modelFor(_ name: String) -> String {
+        return self.profile(named: name)?.model ?? ""
+    }
 }
