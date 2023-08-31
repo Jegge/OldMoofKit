@@ -33,11 +33,11 @@ public struct Profiles {
         return self.profile(named: name) != nil
     }
 
-    public static func hardwareFor(profile name: String) -> Hardware {
+    public static func hardwareForProfile(_ name: String) -> Hardware {
         return self.profile(named: name)?.hardware ?? []
     }
 
-    public static func modelFor(profile name: String) -> String? {
+    public static func modelForProfile(_ name: String) -> String? {
         return self.profile(named: name)?.model
     }
 }
