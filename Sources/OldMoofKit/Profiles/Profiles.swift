@@ -29,7 +29,7 @@ public struct Profiles {
         }
     }
 
-    public static func supports(named name: String) -> Bool {
+    public static func nameIsKnown(_ name: String) -> Bool {
         return self.profile(named: name) != nil
     }
 }

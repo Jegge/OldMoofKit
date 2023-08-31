@@ -31,6 +31,11 @@ protocol Profile {
     func createUnitWriteRequest (value: Unit) -> BikeConnection.WriteRequest?
 }
 
+private let smartBike2016 = SmartBike2016Profile()
+private let smartBike2018 = SmartBike2018Profile()
+private let electrified2017 = Electified2017Profile()
+private let electrified2018 = Electified2018Profile()
+
 extension Profile {
     func createLockReadRequest () -> BikeConnection.ReadRequest<Lock>? {
         return nil
