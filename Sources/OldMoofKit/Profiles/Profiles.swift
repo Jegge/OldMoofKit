@@ -32,4 +32,8 @@ public struct Profiles {
     public static func nameIsKnown(_ name: String) -> Bool {
         return self.profile(named: name) != nil
     }
+
+    public static func hardwareFor(_ name: String) -> Hardware {
+        return self.profile(named: name)?.hardware ?? []
+    }
 }
