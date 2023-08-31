@@ -27,9 +27,7 @@ public protocol BikeConnectionDelegate: AnyObject {
 
 public class BikeConnection: NSObject {
 
-    private let identifier: UUID
-    private let key: Data
-    private let profile: Profile
+    let bike: Bike
 
     public var proximityUnlock: Bool
     public var motionUnlock: Bool
@@ -144,13 +142,8 @@ public class BikeConnection: NSObject {
 
     public weak var delegate: BikeConnectionDelegate?
 
-    public init (identifier: UUID, key: Data, profile name: String, proximityUnlock: Bool, motionUnlock: Bool) throws {
-        guard let profile = Profiles.profile(named: name) else {
-            throw BikeConnectionError.bikeNotSupported
-        }
-        self.identifier = identifier
-        self.key = key
-        self.profile = profile
+    public init (bike: Bike, proximityUnlock: Bool, motionUnlock: Bool) throws {
+        self.bike = bike
         self.proximityUnlock = proximityUnlock
         self.motionUnlock = motionUnlock
     }
@@ -165,7 +158,7 @@ public class BikeConnection: NSObject {
 
         var data = try await connection.readValue(for: request.uuid)
         if request.decrypt {
-            data = try data?.decrypt_aes_ecb_zero(key: self.key)
+            data = try data?.decrypt_aes_ecb_zero(key: self.bike.key)
         }
 
         return request.parse(data)
@@ -178,8 +171,11 @@ public class BikeConnection: NSObject {
         guard let connection = self.connection else {
             throw BikeConnectionError.notConnected
         }
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
 
-        let challenge = try await self.readRequest(self.profile.createChallengeReadRequest())
+        let challenge = try await self.readRequest(profile.createChallengeReadRequest())
         guard var data = challenge?[...1] else {
             return
         }
@@ -190,7 +186,7 @@ public class BikeConnection: NSObject {
 
         data += request.data
 
-        let payload = try data.encrypt_aes_ecb_zero(key: self.key)
+        let payload = try data.encrypt_aes_ecb_zero(key: self.bike.key)
         try await connection.writeValue(payload, for: request.uuid)
     }
 
@@ -205,7 +201,7 @@ public class BikeConnection: NSObject {
             var data = data
             do {
                 if request.decrypt {
-                    data = try data?.decrypt_aes_ecb_zero(key: self.key)
+                    data = try data?.decrypt_aes_ecb_zero(key: self.bike.key)
                 }
                 callback(request.parse(data))
             } catch {
@@ -215,95 +211,131 @@ public class BikeConnection: NSObject {
     }
 
     private func readParameters () async throws -> Parameters {
-        if let parameters = try await self.readRequest(self.profile.createParametersReadRequest()) {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
+        if let parameters = try await self.readRequest(profile.createParametersReadRequest()) {
             return parameters
         } else {
-            let moduleState = try await self.readRequest(self.profile.createModuleStateReadRequest()) ?? .off
+            let moduleState = try await self.readRequest(profile.createModuleStateReadRequest()) ?? .off
             return Parameters(data: nil,
-                              alarm: try await self.readRequest(self.profile.createAlarmReadRequest()) ?? .off,
+                              alarm: try await self.readRequest(profile.createAlarmReadRequest()) ?? .off,
                               moduleState: moduleState,
-                              lock: try await self.readRequest(self.profile.createLockReadRequest()) ?? .locked,
-                              batteryState: try await self.readRequest(self.profile.createBatteryStateReadRequest()) ?? .discharging,
-                              speed: try await self.readRequest(self.profile.createSpeedReadRequest()) ?? 0,
+                              lock: try await self.readRequest(profile.createLockReadRequest()) ?? .locked,
+                              batteryState: try await self.readRequest(profile.createBatteryStateReadRequest()) ?? .discharging,
+                              speed: try await self.readRequest(profile.createSpeedReadRequest()) ?? 0,
                               motorBatteryLevel: nil,
-                              moduleBatteryLevel: try await self.readRequest(self.profile.createBatteryLevelReadRequest()) ?? 0,
-                              lighting: try await self.readRequest(self.profile.createLightingReadRequest()) ?? .off,
+                              moduleBatteryLevel: try await self.readRequest(profile.createBatteryLevelReadRequest()) ?? 0,
+                              lighting: try await self.readRequest(profile.createLightingReadRequest()) ?? .off,
                               unit: nil,
                               motorAssistance: nil,
                               region: nil,
-                              mutedSounds: try await self.readRequest(self.profile.createMuteSoundReadRequest()) ?? .none,
-                              distance: try await self.readRequest(self.profile.createDistanceReadRequest()) ?? 0.0,
-                              errorCode: try await self.readRequest(self.profile.createErrorCodeReadRequest()) ?? ErrorCode())
+                              mutedSounds: try await self.readRequest(profile.createMuteSoundReadRequest()) ?? .none,
+                              distance: try await self.readRequest(profile.createDistanceReadRequest()) ?? 0.0,
+                              errorCode: try await self.readRequest(profile.createErrorCodeReadRequest()) ?? ErrorCode())
         }
     }
 
     private func authenticate () async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Authenticating...")
-        try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.key))
+        try await self.writeRequest(profile.createAuthenticationWriteRequest(key: self.bike.key))
     }
 
     public func wakeup () async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         if self.moduleState == .standby {
             print("Waking the bike up!")
-            try await self.writeRequest(self.profile.createModuleStateWriteRequest(value: .on))
+            try await self.writeRequest(profile.createModuleStateWriteRequest(value: .on))
             try await Task.sleep(nanoseconds: NSEC_PER_SEC / 2)
         }
     }
 
     public func setLocked (_ value: Lock) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting lock to \("\(value)")")
-        try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
+        try await self.writeRequest(profile.createLockWriteRequest(value: value))
     }
 
     public func setLighting (_ value: Lighting) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting lighting to \("\(value)")")
-        try await self.writeRequest(self.profile.createLightingWriteRequest(value: value))
+        try await self.writeRequest(profile.createLightingWriteRequest(value: value))
     }
 
     public func setAlarm (_ value: Alarm) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting alarm to \("\(value)")")
-        try await self.writeRequest(self.profile.createAlarmWriteRequest(value: value))
+        try await self.writeRequest(profile.createAlarmWriteRequest(value: value))
     }
 
     public func setMotorAssistance (_ value: MotorAssistance) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting motor assistance to \("\(value)")")
         if let region = self.region {
-            try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: value, region: region))
+            try await self.writeRequest(profile.createMotorAssistanceWriteRequest(value: value, region: region))
         }
     }
 
     public func setRegion (_ value: Region) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting region to \("\(value)")")
         if let motorAssistance = self.motorAssistance {
-            try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: motorAssistance, region: value))
+            try await self.writeRequest(profile.createMotorAssistanceWriteRequest(value: motorAssistance, region: value))
         }
     }
 
     public func setUnit (_ value: Unit) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting unit to \("\(value)")")
-        try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
+        try await self.writeRequest(profile.createUnitWriteRequest(value: value))
     }
 
     public func setMuteState(_ value: MutedSounds) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Setting muted sounds to \(value.description)")
-        try await self.writeRequest(self.profile.createMutedSoundsWriteRequest(value: value))
+        try await self.writeRequest(profile.createMutedSoundsWriteRequest(value: value))
     }
 
     public func playSound (_ sound: Sound, repeat count: UInt8 = 1) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         print("Playing sound \("\(sound)") \(count) times.")
-        try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
+        try await self.writeRequest(profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
     }
 
     public func setBackupCode (_ code: Int) async throws {
+        guard let profile = self.bike.profile else {
+            throw BikeConnectionError.bikeNotSupported
+        }
         if code < 111 || code > 999 {
             throw BikeConnectionError.codeOutOfRange
         }
         print("Setting backup code to \(code).")
-        try await self.writeRequest(self.profile.createBackupCodeWriteRequest(code: code))
+        try await self.writeRequest(profile.createBackupCodeWriteRequest(code: code))
     }
 
     public func connect () {
-        self.connection = BluetoothConnection(delegate: self, identifier: self.identifier, reconnectInterval: 1)
+        self.connection = BluetoothConnection(delegate: self, identifier: self.bike.identifier, reconnectInterval: 1)
     }
 
     public func disconnect () {
@@ -322,6 +354,10 @@ extension BikeConnection: BluetoothConnectionDelegate {
     internal func bluetoothDidConnect (_ connection: BluetoothConnection) {
         Task {
             do {
+                guard let profile = self.bike.profile else {
+                    throw BikeConnectionError.bikeNotSupported
+                }
+
                 print("Connected")
 
                 try await self.authenticate()
@@ -335,39 +371,39 @@ extension BikeConnection: BluetoothConnectionDelegate {
                 self.parameters = try await self.readParameters()
                 print("Parameters:\n\(self.parameters?.description ?? "-")")
 
-                try self.notifyRequest(self.profile.createParametersReadRequest()) { parameters in
+                try self.notifyRequest(profile.createParametersReadRequest()) { parameters in
                     self.parameters = parameters
                     print("Notification: parameters:\n\(self.parameters?.description ?? "-")")
                 }
-                try? self.notifyRequest(self.profile.createBatteryLevelReadRequest()) { value in
+                try? self.notifyRequest(profile.createBatteryLevelReadRequest()) { value in
                     self.batteryLevel = value ?? 0
                     print("Notification: battery level: \(self.batteryLevel)")
                 }
-                try self.notifyRequest(self.profile.createBatteryStateReadRequest()) { value in
+                try self.notifyRequest(profile.createBatteryStateReadRequest()) { value in
                     self.batteryState = value ?? .discharging
                     print("Notification: battery charging: \("\(self.batteryState)")")
                 }
-                try self.notifyRequest(self.profile.createLockReadRequest()) { value in
+                try self.notifyRequest(profile.createLockReadRequest()) { value in
                     self.lock = value ?? .locked
                     print("Notification: lock: \("\(self.lock)")")
                 }
-                try self.notifyRequest(self.profile.createAlarmReadRequest()) { value in
+                try self.notifyRequest(profile.createAlarmReadRequest()) { value in
                     self.alarm = value
                     print("Notification: alarm: \("\(self.alarm ?? .off)")")
                 }
-                try self.notifyRequest(self.profile.createLightingReadRequest()) { value in
+                try self.notifyRequest(profile.createLightingReadRequest()) { value in
                     self.lighting = value ?? .off
                     print("Notification: lighting: \("\(self.lighting)")")
                 }
-                try self.notifyRequest(self.profile.createModuleStateReadRequest()) { value in
+                try self.notifyRequest(profile.createModuleStateReadRequest()) { value in
                     self.moduleState = value ?? .off
                     print("Notification: module state: \("\(self.moduleState)")")
                 }
-                try self.notifyRequest(self.profile.createErrorCodeReadRequest()) { value in
+                try self.notifyRequest(profile.createErrorCodeReadRequest()) { value in
                     self.errorCode = value ?? ErrorCode()
                     print("Notification: error code: \(self.errorCode)")
                 }
-                try self.notifyRequest(self.profile.createSpeedReadRequest()) { value in
+                try self.notifyRequest(profile.createSpeedReadRequest()) { value in
                     self.speed = value ?? 0
                     print("Notification: speed: \(self.speed)")
                     if self.motionUnlock && self.lock == .locked {
@@ -377,11 +413,11 @@ extension BikeConnection: BluetoothConnectionDelegate {
                         }
                     }
                 }
-                try self.notifyRequest(self.profile.createDistanceReadRequest()) { value in
+                try self.notifyRequest(profile.createDistanceReadRequest()) { value in
                     self.distance = value ?? 0.0
                     print("Notification: distance: \(self.distance)")
                 }
-                try self.notifyRequest(self.profile.createMuteSoundReadRequest()) { value in
+                try self.notifyRequest(profile.createMuteSoundReadRequest()) { value in
                     self.mutedSounds = value ?? .none
                     print("Notification: muted sounds: \(self.mutedSounds)")
                 }

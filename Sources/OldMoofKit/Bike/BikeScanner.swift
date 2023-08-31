@@ -18,12 +18,12 @@ public class BikeScanner: NSObject, BluetoothScannerDelegate {
 
     weak var delegate: BikeScannerDelegate?
 
-    public init (delegate: BikeScannerDelegate?, profile: String, name: String, timeout seconds: TimeInterval = 30) throws {
-        guard let profile = Profiles.profile(named: name) else {
+    public init (delegate: BikeScannerDelegate?, bike: Bike, timeout seconds: TimeInterval = 30) throws {
+        guard let profile = bike.profile else {
             throw BikeConnectionError.bikeNotSupported
         }
         super.init()
-        self.scanner = BluetoothScanner(delegate: self, services: [profile.identifier], name: name)
+        self.scanner = BluetoothScanner(delegate: self, services: [profile.identifier], name: bike.deviceName)
     }
 
     internal func bluetoothScanner(_ scanner: BluetoothScanner, failedWithError error: Error) {
