@@ -12,7 +12,7 @@ public enum Lock: UInt8 {
     case locked = 1
     case awaitingUnlock = 2
 
-    func toggle () -> Lock {
+    public func toggle () -> Lock {
         return (self == .locked) ? .unlocked : .locked
     }
 }

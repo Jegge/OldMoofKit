@@ -7,11 +7,15 @@
 
 import Foundation
 
-struct Hardware: OptionSet {
-    let rawValue: Int
+public struct Hardware: OptionSet {
+    public let rawValue: Int
 
-    static let elock = Hardware(rawValue: 1 << 0)
-    static let alarm = Hardware(rawValue: 1 << 1)
-    static let motor = Hardware(rawValue: 1 << 2)
-    static let speaker = Hardware(rawValue: 1 << 3)
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+
+    public static let elock = Hardware(rawValue: 1 << 0)
+    public static let alarm = Hardware(rawValue: 1 << 1)
+    public static let motor = Hardware(rawValue: 1 << 2)
+    public static let speaker = Hardware(rawValue: 1 << 3)
 }
