@@ -18,7 +18,7 @@ public class BikeScanner: NSObject, BluetoothScannerDelegate {
 
     weak var delegate: BikeScannerDelegate?
 
-    init (delegate: BikeScannerDelegate?, profile: String, name: String, timeout seconds: TimeInterval = 30) throws {
+    public init (delegate: BikeScannerDelegate?, profile: String, name: String, timeout seconds: TimeInterval = 30) throws {
         guard let profile = Profiles.profile(named: name) else {
             throw BikeConnectionError.bikeNotSupported
         }
