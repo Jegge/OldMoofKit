@@ -5,14 +5,14 @@
 //  Created by Sebastian Boettcher on 27.08.23.
 //
 
-struct Profiles {
-    static let smartBike2016 = SmartBike2016Profile()
-    static let smartBike2018 = SmartBike2018Profile()
-    static let electrified2017 = Electified2017Profile()
-    static let electrified2018 = Electified2018Profile()
+public struct Profiles {
+    private static let smartBike2016 = SmartBike2016Profile()
+    private static let smartBike2018 = SmartBike2018Profile()
+    private static let electrified2017 = Electified2017Profile()
+    private static let electrified2018 = Electified2018Profile()
 
     // swiftlint:disable:next cyclomatic_complexity
-    public static func profile(named name: String) -> Profile? {
+    internal static func profile(named name: String) -> Profile? {
         switch name {
         case "SMARTBIKE_2016": return Profiles.smartBike2016            // SmartBike
         case "SMARTBIKE_2018": return Profiles.smartBike2018            // Smart S/X
@@ -27,5 +27,9 @@ struct Profiles {
         case "ELECTRIFIED_2023_TRACK_1": return nil                     // ???
         default: return nil
         }
+    }
+
+    public static func supports(named name: String) -> Bool {
+        return self.profile(named: name) != nil
     }
 }
