@@ -33,4 +33,8 @@ extension Bike {
     public var isSupported: Bool {
         return self.profile != nil
     }
+
+    public var model: String? {
+        return self.profile?.model
+    }
 }

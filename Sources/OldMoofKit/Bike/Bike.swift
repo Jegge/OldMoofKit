@@ -30,14 +30,14 @@ public struct Bike: Codable {
         self.identifier = identifier
     }
 
-    let name: String
-    let frameNumber: String
-    let bleProfile: String
-    let modelName: String
-    let macAddress: String
-    let key: Data
-    let identifier: UUID
-    let smartModuleVersion: String?
+    public let name: String
+    public let frameNumber: String
+    public let bleProfile: String
+    public let modelName: String
+    public let macAddress: String
+    public let key: Data
+    public let identifier: UUID
+    public let smartModuleVersion: String?
 
     var deviceName: String {
         return "VANMOOF-\(macAddress.filter { $0 != ":" }.dropFirst(6))"
