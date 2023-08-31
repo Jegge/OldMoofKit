@@ -35,6 +35,10 @@ extension Bike {
     }
 
     public var model: String? {
-        return self.profile?.model
+        return self.profile?.model ?? self.modelName
+    }
+
+    public var hardware: Hardware {
+        return self.profile?.hardware ?? []
     }
 }
