@@ -29,4 +29,8 @@ extension BikeProperties {
         default: return nil
         }
     }
+
+    public var isSupported: Bool {
+        return self.profile != nil
+    }
 }
