@@ -8,6 +8,17 @@
 import Foundation
 
 public struct BikeProperties: Codable {
+
+    public init(name: String, frameNumber: String, bleProfile: String, modelName: String, macAddress: String, key: Data, smartModuleVersion: String?) {
+        self.name = name
+        self.frameNumber = frameNumber
+        self.bleProfile = bleProfile
+        self.modelName = modelName
+        self.macAddress = macAddress
+        self.key = key
+        self.smartModuleVersion = smartModuleVersion
+    }
+
     public let name: String
     public let frameNumber: String
     public let bleProfile: String

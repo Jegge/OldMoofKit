@@ -14,6 +14,18 @@ public enum BikeEvent {
     case error(_ error: Error)
     case changedAlarm(_ alarm: Alarm)
     case changedLock(_ lock: Lock)
+    case changedLighting(_ lighting: Lighting)
+    case changedBatteryLevel(_ level: Int)
+    case changedBatteryState(_ state: BatteryState)
+    case changedModuleState(_ state: ModuleState)
+    case changedErrorCode(_ code: ErrorCode)
+    case changedMotorAssistance(_ assistance: MotorAssistance)
+    case changedMutedSounds(_ mutedSounds: MutedSounds)
+    case changedSpeed(_ speed: Int)
+    case changedDistance(_ distance: Double)
+    case changedRegion(_ region: Region)
+    case changedUnit(_ unit: Unit)
+
 }
 
 public final class Bike: Codable {
@@ -34,23 +46,83 @@ public final class Bike: Codable {
     private var connection: BluetoothConnection?
     private var bluetoothEvents: AnyCancellable?
 
+    public var isConnected: Bool {
+        return self.connection?.isConnected ?? false
+    }
+
     private (set) public var lock: Lock = .locked {
         didSet {
             self.events.send(.changedLock(self.lock))
         }
     }
-    private (set) public var alarm: Alarm?
-    private (set) public var lighting: Lighting = .off
-    private (set) public var batteryLevel: Int = 0
-    private (set) public var batteryState: BatteryState = .discharging
-    private (set) public var moduleState: ModuleState = .off
-    private (set) public var errorCode: ErrorCode = ErrorCode()
-    private (set) public var motorAssistance: MotorAssistance?
-    private (set) public var mutedSounds: MutedSounds = []
-    private (set) public var speed: Int = 0
-    private (set) public var distance: Double = 0
-    private (set) public var region: Region?
-    private (set) public var unit: Unit?
+    private (set) public var alarm: Alarm? {
+        didSet {
+            if let alarm = self.alarm {
+                self.events.send(.changedAlarm(alarm))
+            }
+        }
+    }
+    private (set) public var lighting: Lighting = .off {
+        didSet {
+            self.events.send(.changedLighting(self.lighting))
+        }
+    }
+    private (set) public var batteryLevel: Int = 0 {
+        didSet {
+            self.events.send(.changedBatteryLevel(self.batteryLevel))
+        }
+    }
+    private (set) public var batteryState: BatteryState = .discharging {
+        didSet {
+            self.events.send(.changedBatteryState(self.batteryState))
+        }
+    }
+    private (set) public var moduleState: ModuleState = .off {
+        didSet {
+            self.events.send(.changedModuleState(self.moduleState))
+        }
+    }
+    private (set) public var errorCode: ErrorCode = ErrorCode() {
+        didSet {
+            self.events.send(.changedErrorCode(self.errorCode))
+        }
+    }
+    private (set) public var motorAssistance: MotorAssistance? {
+        didSet {
+            if let motorAssistance = self.motorAssistance {
+                self.events.send(.changedMotorAssistance(motorAssistance))
+            }
+        }
+    }
+    private (set) public var mutedSounds: MutedSounds = [] {
+        didSet {
+            self.events.send(.changedMutedSounds(self.mutedSounds))
+        }
+    }
+    private (set) public var speed: Int = 0 {
+        didSet {
+            self.events.send(.changedSpeed(self.speed))
+        }
+    }
+    private (set) public var distance: Double = 0 {
+        didSet {
+            self.events.send(.changedDistance(self.distance))
+        }
+    }
+    private (set) public var region: Region? {
+        didSet {
+            if let region = self.region {
+                self.events.send(.changedRegion(region))
+            }
+        }
+    }
+    private (set) public var unit: Unit? {
+        didSet {
+            if let unit = self.unit {
+                self.events.send(.changedUnit(unit))
+            }
+        }
+    }
 
     private init (identifier: UUID, properties: BikeProperties, profile: Profile, configuration: BikeConfiguration) {
         self.identifier = identifier
