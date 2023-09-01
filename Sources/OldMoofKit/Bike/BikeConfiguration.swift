@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BikeConfiguration: Codable {
+public struct BikeConfiguration: Codable {
 
     init () {
         self.proximityUnlock = false
