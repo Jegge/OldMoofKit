@@ -12,9 +12,3 @@ struct ReadRequest<T> {
     let decrypt: Bool
     let parse: ((Data?) -> T?)
 }
-
-struct WriteRequest {
-    let uuid: CBUUID
-    let command: UInt8?
-    let data: Data
-}
