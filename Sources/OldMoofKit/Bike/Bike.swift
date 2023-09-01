@@ -224,7 +224,7 @@ public final class Bike: Codable {
 
         if self.configuration.proximityUnlock {
             print("Unlocking because of proximity...")
-            try await self.setLocked(.unlocked)
+            try await self.set(lock: .unlocked)
         }
 
         print("Reading parameters...")
@@ -335,7 +335,7 @@ public final class Bike: Codable {
             if self.configuration.motionUnlock && self.lock == .locked {
                 Task {
                     print("Unlocking because of motion...")
-                    try await self.setLocked(.unlocked)
+                    try await self.set(lock: .unlocked)
                 }
             }
         }
@@ -357,41 +357,41 @@ public final class Bike: Codable {
         }
     }
 
-    public func setLocked (_ value: Lock) async throws {
+    public func set (lock value: Lock) async throws {
         print("Setting lock to \("\(value)")")
         try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
     }
 
-    public func setLighting (_ value: Lighting) async throws {
+    public func set (lighting value: Lighting) async throws {
         print("Setting lighting to \("\(value)")")
         try await self.writeRequest(self.profile.createLightingWriteRequest(value: value))
     }
 
-    public func setAlarm (_ value: Alarm) async throws {
+    public func set (alarm value: Alarm) async throws {
         print("Setting alarm to \("\(value)")")
         try await self.writeRequest(self.profile.createAlarmWriteRequest(value: value))
     }
 
-    public func setMotorAssistance (_ value: MotorAssistance) async throws {
+    public func set (motorAssistance value: MotorAssistance) async throws {
         print("Setting motor assistance to \("\(value)")")
         if let region = self.region {
             try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: value, region: region))
         }
     }
 
-    public func setRegion (_ value: Region) async throws {
+    public func set (region value: Region) async throws {
         print("Setting region to \("\(value)")")
         if let motorAssistance = self.motorAssistance {
             try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: motorAssistance, region: value))
         }
     }
 
-    public func setUnit (_ value: Unit) async throws {
+    public func set (unit value: Unit) async throws {
         print("Setting unit to \("\(value)")")
         try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
     }
 
-    public func setMuteState(_ value: MutedSounds) async throws {
+    public func set(mutedSounds value: MutedSounds) async throws {
         print("Setting muted sounds to \(value.description)")
         try await self.writeRequest(self.profile.createMutedSoundsWriteRequest(value: value))
     }
@@ -401,7 +401,7 @@ public final class Bike: Codable {
         try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
     }
 
-    public func setBackupCode (_ code: Int) async throws {
+    public func set (backupCode code: Int) async throws {
         if code < 111 || code > 999 {
             throw BikeConnectionError.codeOutOfRange
         }
