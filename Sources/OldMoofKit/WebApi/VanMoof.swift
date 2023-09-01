@@ -7,7 +7,7 @@
 
 import Foundation
 
-class VanMoof {
+public struct VanMoof {
     fileprivate struct Key {
         static let data = "data"
         static let bikeDetails = "bikeDetails"
@@ -29,7 +29,7 @@ class VanMoof {
     private var token: String = ""
     private var refreshToken: String = ""
 
-    convenience init () {
+    init () {
         self.init(baseURL: URL(string: "https://my.vanmoof.com/api/v8/")!, apiKey: "fcb38d47-f14b-30cf-843b-26283f6a5819")
     }
 
@@ -38,7 +38,7 @@ class VanMoof {
         self.apiKey = apiKey
     }
 
-    func authenticate (username: String, password: String) async throws {
+    mutating func authenticate (username: String, password: String) async throws {
         self.token = ""
         self.refreshToken = ""
 
