@@ -93,7 +93,7 @@ struct Electified2018Profile: Profile {
             let motorAssistance: MotorAssistance = MotorAssistance(rawValue: (data[8] & 0x1C) >> 2) ?? .off
             let region: Region = Region(rawValue: data[8] & 3) ?? .offroad
             let mutedSounds: MutedSounds = MutedSounds(rawValue: UInt16(data[10]) << 6)
-            let distance: Double = Double(data[11...14].uint32) / 10.0
+            let distance: Double = Double(Data(data[11...14]).uint32) / 10.0
             let errorCode: ErrorCode = ErrorCode(code: (data[15] & 0xF8) >> 3)
             let isCharging: BatteryState = (data[15] & 0x01) == 0x01 ? .charging : .discharging
             // 02: 010 -> oben ab

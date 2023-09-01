@@ -79,7 +79,7 @@ struct Electified2017Profile: Profile {
             let motorAssistance: MotorAssistance = MotorAssistance(rawValue: data[8]) ?? .off
             let region: Region = Region(rawValue: data[9]) ?? .offroad
             let unit: Unit = Unit(rawValue: data[10]) ?? .metric
-            let distance: Double = Double(data[11...14].uint32) / 10.0
+            let distance: Double = Double(Data(data[11...14]).uint32) / 10.0
             let errorCode: ErrorCode = ErrorCode(code: (data[15] & 0xF8) >> 3)
             let isCharging: BatteryState = (data[15] & 0x01) == 0x01 ? .charging : .discharging
 
