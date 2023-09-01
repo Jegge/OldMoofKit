@@ -8,7 +8,7 @@
 import CoreBluetooth
 import Combine
 
-enum BikeEvent {
+public enum BikeEvent {
     case connected
     case disconnected
     case error(_ error: Error)
@@ -16,7 +16,7 @@ enum BikeEvent {
     case changedLock(_ lock: Lock)
 }
 
-final class Bike: Codable {
+public final class Bike: Codable {
 
     enum CodingKeys: String, CodingKey {
         case identifier
