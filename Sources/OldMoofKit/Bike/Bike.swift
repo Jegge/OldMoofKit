@@ -212,7 +212,6 @@ public final class Bike: Codable {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func setupConnection () async throws {
         print("Authenticating...")
         try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.properties.key))
@@ -287,7 +286,7 @@ public final class Bike: Codable {
             self.batteryState = parameters.batteryState
         }
         try? self.notifyRequest(profile.createBatteryLevelReadRequest()) { value in
-            print("Notification: battery level: \(value)")
+            print("Notification: battery level: \(value)%")
             self.batteryLevel = value
         }
         try self.notifyRequest(profile.createBatteryStateReadRequest()) { value in
@@ -319,12 +318,12 @@ public final class Bike: Codable {
             self.speed = value
         }
         try self.notifyRequest(profile.createDistanceReadRequest()) { value in
-            print("Notification: distance: \(value)")
+            print("Notification: distance: \(value) km")
             self.distance = value
         }
         try self.notifyRequest(profile.createMuteSoundReadRequest()) { value in
+            print("Notification: muted sounds: \(value)")
             self.mutedSounds = value
-            print("Notification: muted sounds: \(self.mutedSounds)")
         }
     }
 
@@ -337,36 +336,36 @@ public final class Bike: Codable {
     }
 
     public func set (lock value: Lock) async throws {
-        print("Setting lock to \("\(value)")")
+        print("Setting lock to \(value)")
         try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
     }
 
     public func set (lighting value: Lighting) async throws {
-        print("Setting lighting to \("\(value)")")
+        print("Setting lighting to \(value)")
         try await self.writeRequest(self.profile.createLightingWriteRequest(value: value))
     }
 
     public func set (alarm value: Alarm) async throws {
-        print("Setting alarm to \("\(value)")")
+        print("Setting alarm to \(value)")
         try await self.writeRequest(self.profile.createAlarmWriteRequest(value: value))
     }
 
     public func set (motorAssistance value: MotorAssistance) async throws {
-        print("Setting motor assistance to \("\(value)")")
+        print("Setting motor assistance to \(value)")
         if let region = self.region {
             try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: value, region: region))
         }
     }
 
     public func set (region value: Region) async throws {
-        print("Setting region to \("\(value)")")
+        print("Setting region to \(value)")
         if let motorAssistance = self.motorAssistance {
             try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: motorAssistance, region: value))
         }
     }
 
     public func set (unit value: Unit) async throws {
-        print("Setting unit to \("\(value)")")
+        print("Setting unit to \(value)")
         try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
     }
 
@@ -376,7 +375,7 @@ public final class Bike: Codable {
     }
 
     public func playSound (_ sound: Sound, repeat count: UInt8 = 1) async throws {
-        print("Playing sound \("\(sound)") \(count) times.")
+        print("Playing sound \(sound) \(count) times.")
         try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
     }
 
