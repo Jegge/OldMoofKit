@@ -19,6 +19,6 @@ public struct BikeConfiguration: Codable {
         self.motionUnlock = motionUnlock
     }
 
-    public let proximityUnlock: Bool
-    public let motionUnlock: Bool
+    public var proximityUnlock: Bool
+    public var motionUnlock: Bool
 }

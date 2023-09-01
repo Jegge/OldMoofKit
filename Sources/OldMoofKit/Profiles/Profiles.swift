@@ -33,4 +33,12 @@ extension BikeProperties {
     public var isSupported: Bool {
         return self.profile != nil
     }
+
+    public var hardware: Hardware {
+        return self.profile?.hardware ?? []
+    }
+
+    public var model: String {
+        return self.profile?.model ?? self.modelName
+    }
 }
