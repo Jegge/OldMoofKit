@@ -5,14 +5,14 @@
 //  Created by Sebastian Boettcher on 27.08.23.
 //
 
-private struct Profiles {
+struct Profiles {
     static let smartBike2016 = SmartBike2016Profile()
     static let smartBike2018 = SmartBike2018Profile()
     static let electrified2017 = Electified2017Profile()
     static let electrified2018 = Electified2018Profile()
 }
 
-extension Bike {
+extension BikeProperties {
     internal var profile: Profile? {
         switch name {
         case "SMARTBIKE_2016": return Profiles.smartBike2016            // SmartBike
@@ -28,17 +28,5 @@ extension Bike {
         case "ELECTRIFIED_2023_TRACK_1": return nil                     // ???
         default: return nil
         }
-    }
-
-    public var isSupported: Bool {
-        return self.profile != nil
-    }
-
-    public var model: String? {
-        return self.profile?.model ?? self.modelName
-    }
-
-    public var hardware: Hardware {
-        return self.profile?.hardware ?? []
     }
 }
