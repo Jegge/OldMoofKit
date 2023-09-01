@@ -153,7 +153,7 @@ public struct VanMoof {
     }
 }
 
-extension Array where Element == BikeProperties {
+public extension Array where Element == BikeProperties {
     init(parse data: Data?) throws {
         guard let data = data else {
             throw VanMoofError.invalidData
