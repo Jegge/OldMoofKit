@@ -152,3 +152,51 @@ public struct VanMoof {
         }
     }
 }
+
+extension Array where Element == BikeProperties {
+    init(parse data: Data?) throws {
+        guard let data = data else {
+            throw VanMoofError.invalidData
+        }
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            throw VanMoofError.malformedJson
+        }
+        let items = try json.compactMap { detail in
+            guard let name = detail[VanMoof.Key.name] as? String else {
+                throw VanMoofError.expectedName
+            }
+            guard let frameNumber = detail[VanMoof.Key.frameNumber] as? String else {
+                throw VanMoofError.expectedFrameNumber
+            }
+            guard let bleProfile = detail[VanMoof.Key.bleProfile] as? String else {
+                throw VanMoofError.expectedBleProfile
+            }
+            guard let modelName = detail[VanMoof.Key.modelName] as? String else {
+                throw VanMoofError.expectedModelName
+            }
+            guard let macAddress = detail[VanMoof.Key.macAddress] as? String else {
+                throw VanMoofError.expectedMacAddress
+            }
+            guard let key = detail[VanMoof.Key.key] as? [String: Any] else {
+                throw VanMoofError.expectedKey
+            }
+            guard let encryptionKey = key[VanMoof.Key.encryptionKey] as? String else {
+                throw VanMoofError.expectedEncryptionKey
+            }
+            guard let encryptionKey = Data(hexString: encryptionKey) else {
+                throw VanMoofError.malformedEncryptionKey
+            }
+
+            let version = detail[VanMoof.Key.smartmoduleCurrentVersion] as? String
+
+            return BikeProperties(name: name,
+                                  frameNumber: frameNumber,
+                                  bleProfile: bleProfile,
+                                  modelName: modelName,
+                                  macAddress: macAddress,
+                                  key: encryptionKey,
+                                  smartModuleVersion: version)
+        }
+        self.init(items)
+    }
+}
