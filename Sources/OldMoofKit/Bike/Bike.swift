@@ -31,12 +31,10 @@ public final class Bike: Codable {
     enum CodingKeys: String, CodingKey {
         case identifier
         case properties
-        case configuration
     }
 
     public let identifier: UUID
     public let properties: BikeProperties
-    public var configuration: BikeConfiguration
 
     public let events: PassthroughSubject<BikeEvent, Never> = PassthroughSubject<BikeEvent, Never>()
 
@@ -122,10 +120,9 @@ public final class Bike: Codable {
         }
     }
 
-    private init (identifier: UUID, properties: BikeProperties, profile: Profile, configuration: BikeConfiguration) {
+    private init (identifier: UUID, properties: BikeProperties, profile: Profile) {
         self.identifier = identifier
         self.properties = properties
-        self.configuration = configuration
         self.profile = profile
     }
 
@@ -133,11 +130,10 @@ public final class Bike: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let identifier = try container.decode(UUID.self, forKey: .identifier)
         let properties = try container.decode(BikeProperties.self, forKey: .properties)
-        let configuration = try container.decode(BikeConfiguration.self, forKey: .configuration)
         guard let profile = properties.profile else {
             throw BikeConnectionError.bikeNotSupported
         }
-        self.init(identifier: identifier, properties: properties, profile: profile, configuration: configuration)
+        self.init(identifier: identifier, properties: properties, profile: profile)
     }
 
     public convenience init (scanningForBikeMatchingProperties properties: BikeProperties, timeout seconds: TimeInterval = 30) async throws {
@@ -146,14 +142,13 @@ public final class Bike: Codable {
         }
         let scanner = BluetoothScanner()
         let identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: properties.deviceName, timeout: seconds)
-        self.init(identifier: identifier, properties: properties, profile: profile, configuration: BikeConfiguration())
+        self.init(identifier: identifier, properties: properties, profile: profile)
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.identifier, forKey: .identifier)
         try container.encode(self.properties, forKey: .properties)
-        try container.encode(self.configuration, forKey: .configuration)
     }
 
       private func readRequest<T> (_ request: ReadRequest<T>?) async throws -> T? {
@@ -222,11 +217,6 @@ public final class Bike: Codable {
         print("Authenticating...")
         try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.properties.key))
 
-        if self.configuration.proximityUnlock {
-            print("Unlocking because of proximity...")
-            try await self.set(lock: .unlocked)
-        }
-
         print("Reading parameters...")
         if let parameters = try await self.readRequest(self.profile.createParametersReadRequest()) {
             print("Parameters:\n\(parameters.description)")
@@ -236,7 +226,6 @@ public final class Bike: Codable {
             self.lighting = parameters.lighting
             self.moduleState = parameters.moduleState
             self.motorAssistance = parameters.motorAssistance
-            self.speed = parameters.speed
             self.mutedSounds = parameters.mutedSounds
             self.errorCode = parameters.errorCode
             self.distance = parameters.distance
@@ -244,7 +233,7 @@ public final class Bike: Codable {
             self.unit = parameters.unit
             self.batteryState = parameters.batteryState
         }
-          if let moduleBatteryLevel = try await self.readRequest(self.profile.createBatteryLevelReadRequest()) {
+        if let moduleBatteryLevel = try await self.readRequest(self.profile.createBatteryLevelReadRequest()) {
              print("Module battery level: \(moduleBatteryLevel)%")
             self.batteryLevel = moduleBatteryLevel
         }
@@ -263,10 +252,6 @@ public final class Bike: Codable {
         if let moduleState = try await self.readRequest(self.profile.createModuleStateReadRequest()) {
             print("Module state: \(moduleState)")
             self.moduleState = moduleState
-        }
-        if let speed = try await self.readRequest(self.profile.createSpeedReadRequest()) {
-            print("Speed: \(speed)")
-            self.speed = speed
         }
         if let mutedSounds = try await self.readRequest(self.profile.createMuteSoundReadRequest()) {
             print("Muted sounds: \(mutedSounds.description)")
@@ -302,46 +287,40 @@ public final class Bike: Codable {
             self.batteryState = parameters.batteryState
         }
         try? self.notifyRequest(profile.createBatteryLevelReadRequest()) { value in
+            print("Notification: battery level: \(value)")
             self.batteryLevel = value
-            print("Notification: battery level: \(self.batteryLevel)")
         }
         try self.notifyRequest(profile.createBatteryStateReadRequest()) { value in
+            print("Notification: battery charging: \(value)")
             self.batteryState = value
-            print("Notification: battery charging: \("\(self.batteryState)")")
         }
         try self.notifyRequest(profile.createLockReadRequest()) { value in
+            print("Notification: lock: \(value)")
             self.lock = value
-            print("Notification: lock: \("\(self.lock)")")
         }
         try self.notifyRequest(profile.createAlarmReadRequest()) { value in
+            print("Notification: alarm: \(value)")
             self.alarm = value
-            print("Notification: alarm: \("\(self.alarm ?? .off)")")
         }
         try self.notifyRequest(profile.createLightingReadRequest()) { value in
+            print("Notification: lighting: \(value)")
             self.lighting = value
-            print("Notification: lighting: \("\(self.lighting)")")
         }
         try self.notifyRequest(profile.createModuleStateReadRequest()) { value in
+            print("Notification: module state: \(value)")
             self.moduleState = value
-            print("Notification: module state: \("\(self.moduleState)")")
         }
         try self.notifyRequest(profile.createErrorCodeReadRequest()) { value in
+            print("Notification: error code: \(value)")
             self.errorCode = value
-            print("Notification: error code: \(self.errorCode)")
         }
         try self.notifyRequest(profile.createSpeedReadRequest()) { value in
+            print("Notification: speed: \(value)")
             self.speed = value
-            print("Notification: speed: \(self.speed)")
-            if self.configuration.motionUnlock && self.lock == .locked {
-                Task {
-                    print("Unlocking because of motion...")
-                    try await self.set(lock: .unlocked)
-                }
-            }
         }
         try self.notifyRequest(profile.createDistanceReadRequest()) { value in
+            print("Notification: distance: \(value)")
             self.distance = value
-            print("Notification: distance: \(self.distance)")
         }
         try self.notifyRequest(profile.createMuteSoundReadRequest()) { value in
             self.mutedSounds = value
@@ -349,7 +328,7 @@ public final class Bike: Codable {
         }
     }
 
-       public func wakeup () async throws {
+    public func wakeup () async throws {
         if self.moduleState == .standby {
             print("Waking the bike up!")
             try await self.writeRequest(self.profile.createModuleStateWriteRequest(value: .on))
