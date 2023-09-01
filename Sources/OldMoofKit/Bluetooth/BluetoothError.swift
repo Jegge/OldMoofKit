@@ -24,7 +24,7 @@ extension BluetoothError: LocalizedError {
         case .peripheralNotFound:
             return NSLocalizedString("No bike with the given device identifier could be found.", comment: "Error description: peripheralNotFound")
         case .timeout:
-            return NSLocalizedString("No bike could be found via bluetooth in a reasonable time.", comment: "Error description: timedOut")
+            return NSLocalizedString("No bike could be found via bluetooth in a reasonable time. Make sure that it is in range and that no other apps are connected to it.", comment: "Error description: timedOut")
         case .unauthorized:
             return NSLocalizedString("Bluetooth needs to be enabled for this app in the settings.", comment: "Error description: unauthorized")
         case .unsupported:

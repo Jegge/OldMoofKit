@@ -21,7 +21,7 @@ extension BikeConnectionError: LocalizedError {
         case .notConnected:
             return NSLocalizedString("The bike is currently not connected.", comment: "Error description: notConnected")
         case .codeOutOfRange:
-            return NSLocalizedString("The code must be in the range from 0 to 999.", comment: "Error descritpion: codeOutOfRange")
+            return NSLocalizedString("The code must be in the range from 111 to 999.", comment: "Error descritpion: codeOutOfRange")
         }
     }
 }
