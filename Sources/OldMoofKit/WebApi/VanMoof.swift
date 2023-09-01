@@ -29,16 +29,16 @@ public struct VanMoof {
     private var token: String = ""
     private var refreshToken: String = ""
 
-    init () {
+    public init () {
         self.init(baseURL: URL(string: "https://my.vanmoof.com/api/v8/")!, apiKey: "fcb38d47-f14b-30cf-843b-26283f6a5819")
     }
 
-    init(baseURL: URL, apiKey: String) {
+    public init(baseURL: URL, apiKey: String) {
         self.baseURL = baseURL
         self.apiKey = apiKey
     }
 
-    mutating func authenticate (username: String, password: String) async throws {
+    public mutating func authenticate (username: String, password: String) async throws {
         self.token = ""
         self.refreshToken = ""
 
@@ -78,7 +78,7 @@ public struct VanMoof {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    func bikeProperties () async throws -> [BikeProperties] {
+    public func bikeProperties () async throws -> [BikeProperties] {
         if self.token == "" || self.refreshToken == "" {
             throw VanMoofError.notAuthenticated
         }
