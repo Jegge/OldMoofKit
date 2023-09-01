@@ -14,14 +14,17 @@ internal class BluetoothScanner: NSObject, CBCentralManagerDelegate {
     private var services: [CBUUID]?
     private var name: String?
     private var continuation: CheckedContinuation<UUID, Error>?
-    private var timeoutInterval: TimeInterval = .infinity
+    private var timeout: TimeInterval = .infinity
 
-    func scanForPeripherals(withServices: [CBUUID]?, name: String?, timeout seconds: TimeInterval = 30) async throws -> UUID {
+    func scanForPeripherals(withServices services: [CBUUID]?, name: String?, timeout seconds: TimeInterval = 30) async throws -> UUID {
         if self.continuation != nil {
             throw BluetoothError.busy
         }
-        self.timeoutInterval = seconds
-          return try await withCheckedThrowingContinuation { continuation in
+        self.name = name
+        self.services = services
+        self.timeout = seconds
+
+        return try await withCheckedThrowingContinuation { continuation in
               self.continuation = continuation
             self.central = CBCentralManager(delegate: self, queue: self.queue)
         }
@@ -32,7 +35,7 @@ internal class BluetoothScanner: NSObject, CBCentralManagerDelegate {
         case .poweredOn:
             self.central?.scanForPeripherals(withServices: self.services)
             DispatchQueue.main.sync {
-                self.timer = Timer.scheduledTimer(withTimeInterval: self.timeoutInterval, repeats: false) { _ in
+                self.timer = Timer.scheduledTimer(withTimeInterval: self.timeout, repeats: false) { _ in
                     self.central?.stopScan()
                     self.timer?.invalidate()
                     self.timer = nil
