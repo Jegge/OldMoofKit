@@ -38,7 +38,7 @@ public final class Bike: Codable {
 
     public let identifier: UUID
     public let properties: BikeProperties
-    public let configuration: BikeConfiguration
+    public var configuration: BikeConfiguration
 
     public let events: PassthroughSubject<BikeEvent, Never> = PassthroughSubject<BikeEvent, Never>()
 
