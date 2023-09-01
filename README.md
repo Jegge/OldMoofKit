@@ -34,9 +34,18 @@ bike.connect()
 
 ## Inspired by
 
-* https://github.com/SvenTiigi/VanMoofKit
-* https://github.com/Poket-Jony/vanbike-lib/tree/main
-* https://github.com/quantsini/pymoof/tree/main
+* [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit)
+* [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+* [PyMoof](https://github.com/quantsini/pymoof/tree/main)
+
+## Supported bikes
+
+ [x] SmartBike (untested)
+ [x] SmartS / SmartX (tested)
+ [x] Electrified S/X (untested)
+ [x] S/X 2 (tested)
+ [ ] S/X 3 - use [`VanMoofKit`] instead
+
 
 ## Info.plist
 
@@ -46,3 +55,8 @@ As the VanMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/doc
 <key>NSBluetoothAlwaysUsageDescription</key>
 <string>Establishing a bluetooth connection to your VanMoof Bike.</string>
 ```
+
+## Connection
+
+A connected bike stays connected until you manuall disconnect it. Should the connection drop due to a timeout or the like, it will automatically get restored. To get informed about the current state, subscribe to the `bike.events`.
+ 
