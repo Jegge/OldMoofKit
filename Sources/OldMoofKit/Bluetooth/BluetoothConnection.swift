@@ -79,10 +79,10 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
 
     internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         if let error = error {
-               self.events.send(.error(error))
+           self.events.send(.error(error))
         }
         self.disconnectPeripheral()
-        // self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
+        self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
     }
 
     internal func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {

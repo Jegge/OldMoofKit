@@ -25,7 +25,7 @@ internal class BluetoothScanner: NSObject, CBCentralManagerDelegate {
         self.timeout = seconds
 
         return try await withCheckedThrowingContinuation { continuation in
-              self.continuation = continuation
+            self.continuation = continuation
             self.central = CBCentralManager(delegate: self, queue: self.queue)
         }
     }

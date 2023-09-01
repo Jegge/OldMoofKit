@@ -25,11 +25,9 @@ public enum BikeEvent {
     case changedDistance(_ distance: Double)
     case changedRegion(_ region: Region)
     case changedUnit(_ unit: Unit)
-
 }
 
 public final class Bike: Codable {
-
     enum CodingKeys: String, CodingKey {
         case identifier
         case properties
