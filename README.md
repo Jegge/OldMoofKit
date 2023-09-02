@@ -122,6 +122,23 @@ subscription.cancel()
 
 > **Note**: When disconnecting, do not forget to cancel your subscription.
 
+## Errors
+
+The bike also sports a dedicated `errorPublisher`, that you can subscripe to to get error messages.
+
+```swift
+let subscription: AnyCancellable = bike.errorPublisher.receive(on: RunLoop.main).sink { error in
+    // react to the error
+    print("Error: \(error))
+}
+
+subscription.cancel()
+```
+
+> **Note**: Make sure to receive the state changes on the correct thread.
+
+> **Note**: When disconnecting, do not forget to cancel your subscription.
+
 ## Getting, observing and setting bike properties
 
 The bike has all kind of properties that represent the current known state of the bike, as:
