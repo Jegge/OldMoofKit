@@ -139,7 +139,7 @@ The bike has all kind of properties that represent the current known state of th
 - `region` (eu, us, japan, offroad)
 - `unit` (metric, imperial)
 
-> **Note**: if your bike does not support a properity, it will be `nil`.
+> **Note**: if your bike does not support a properity, it's value will be `nil`.
 
 For each property there is an associated `Publisher` that allows monitoring changes of value.
 
