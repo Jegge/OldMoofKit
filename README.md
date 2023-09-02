@@ -15,11 +15,15 @@ try await bike.set(lock: .unlocked)
 bike.disconnect()
 ```
 
-## Inspired by
+## Disclaimer
 
-* [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit)
-* [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
-* [PyMoof](https://github.com/quantsini/pymoof/tree/main)
+> VanMoofKit is not an official library of [VanMoof B.V](https://vanmoof.com). This Swift Package makes certain features of the bike accessible which may be illegal to use in certain jurisdictions. As this library hasn't reached an official stable version some features are not yet available or may not working as expected.
+
+## Features
+
+- [x] Establish a bluetooth connection to a VanMoof Bike using async/await
+- [x] Easily change the configuration of the bike such as power level, light mode and many more
+- [x] Combine support to react to changes of certain functions
 
 ## Supported bikes
 
@@ -51,10 +55,9 @@ To initially get a bike, connect to the VanMoof webapi and retrieve the first bi
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
 ```
 
-### From details
+### Manually from details
 
 If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually.
-Make sure that you've got the `bleProfile`, the `macAddress` and the `key` correct, otherwise the connection will not be established. The other parameters are solely flavour text.
 
 ```swift
 let details = BikeDetails(
@@ -70,25 +73,24 @@ let details = BikeDetails(
 let bike = try await Bike(scanningForBikeMatchingDetails: details)
 ```
 
+> **Note**: Make sure that you've got the `bleProfile`, the `macAddress` and the `key` correct, otherwise the connection will not be established. The other parameters are solely flavour text.
+
 ### Codable
 
 Bikes implement Codable and thus can be serialized / deserialized should the need arise.
 
 ```swift
 
-// write bike
-
+// store a bike as data
 let data = try? JSONEncoder().encode(bike)
 
-// read it back
-
+// read another bike back from data
 let otherBike = JSONDecoder().decode(Bike.self, from: data)
 ```
 
-
 ## Connection
 
-Connecting a bike is straightforward, just call the `connect` method. 
+Connecting a bike is straight forward, just call the `connect` method. 
 
 ```swift
 try await bike.connect()
@@ -106,39 +108,93 @@ To retrieve the current connection state, query the bike's `state`:
 let state = bike.state
 ```
 
-You may also subscribe ot the `statePublisher' and be informed when the current state changes. Make sure to receive the state changes on the correct thread.
+You may also subscribe ot the `statePublisher' and be informed when the current state changes.
 
 ```swift
 let subscription: AnyCancellable = bike.statePublisher.receive(on: RunLoop.main).sink { state in
     // react to state ...
 }
 
-// when disconnecting, do not forget to cancel your subscription:
 subscription.cancel()
 ```
 
-## Properties
+> **Note**: Make sure to receive the state changes on the correct thread.
+
+> **Note**: When disconnecting, do not forget to cancel your subscription.
+
+## Getting, observing and setting bike properties
 
 The bike has all kind of properties that represent the current known state of the bike, as:
 
-- lock (locked, unlocked)
-- alarm (on, off, automatic)
-- lighting (always on, automatic, off)
-- battery level and state (charging, discharging and percent charged)
-- module state (sleeping, off, on)
-- current error code (raw data, depending on the bike model)
-- motor assistance (off, one, two, three, four)
-- muted sounds (wake up sound, shutdown sound, lock sound, unlock sound)
-- speed (current speed in km/h)
-- distance (distance in km)
-- region (eu, us, japan, offroad)
-- unit (metric, imperial)
+- `lock` (locked, unlocked)
+- `alarm` (on, off, automatic)
+- `lighting` (always on, automatic, off)
+- `battery level` and `battery state` (charging, discharging and percent charged)
+- `module state` (sleeping, off, on)
+- `current error code` (raw data, depending on the bike model)
+- `motor assistance` (off, one, two, three, four)
+- `muted sounds` (wake up sound, shutdown sound, lock sound, unlock sound)
+- `speed` (current speed in km/h)
+- `distance` (distance in km)
+- `region` (eu, us, japan, offroad)
+- `unit` (metric, imperial)
 
-`Note:` if your bike does not support a properity, it will be `nil`.
+> **Note**: if your bike does not support a properity, it will be `nil`.
 
 For each property there is an associated `Publisher` that allows monitoring changes of value.
 
+```swift
+let subscription: AnyCancellable = bike.lightingPublisher.receive(on: RunLoop.main).sink { state in
+    // do something when lighting changed ...
+}
+
+subscription.cancel()
+```
+> **Note**: Make sure to receive the state changes on the correct thread.
+
+> **Note**: When disconnecting, do not forget to cancel your subscription.
+
+Each property is complemented by a setter:
+
+```swift
+try await bike.set(lighting: .alwaysOn)
+```
+
+## Other functions
+
+### Play sounds
+
+### Setting backup code
+
+### Waking the bike
 
 
+## Credits and inspirations
 
+* [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit)
+* [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+* [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
+## License
+
+MIT License
+
+Copyright (c) 2023 Sebastian Boettcher
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
