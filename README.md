@@ -1,35 +1,18 @@
 # OldMoofKit
 
-### A Swift Package to communicate with older VanMoof bikes, e.G. SmartBike, SmartS/X, Electrified S/X or S/X2
+### A Swift Package to communicate with older VanMoof bikes, such as SmartBike, SmartS/X, Electrified S/X or S/X2
 
 ```swift
 import OldMoofKit
 
-let details = BikeDetails(
-    name: "MyCoolBike",
-    frameNumber: "ABC123456",
-    bleProfile: "SMARTBIKE_2018",
-    modelName: "VM01-145-2G",
-    macAddress: "12:34:56:78:9A:BC",
-    key: Data(hexString: "1234567890abcdef")!,
-    smartModuleVersion: "1.2.0"
-)
+let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish") // queries the vanmoof web api
+try await bike.connect()
+try await bike.set(lock: .unlocked)
 
-let bike = try await Bike(scanningForBikeMatchingDetails: details)
+// The bike is now connected. It will stay that way until manually disconnected.
+// Should the connection drop due to a timeout or the like, it will automatically get restored.
 
-let events = bike.events.receive(on: RunLoop.main).sink { event in
-    switch event {
-    case .connected:
-        bike.set(lock: .unlocked)
-        bike.disconnect()
-        events.cancel()
-        
-    default:
-        break
-    }
-}
-
-bike.connect()
+bike.disconnect()
 ```
 
 ## Inspired by
@@ -60,5 +43,44 @@ As the VanMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/doc
 
 ## Connection
 
-A connected bike stays connected until you manuall disconnect it. Should the connection drop due to a timeout or the like, it will automatically get restored. To get informed about the current state, subscribe to the `bike.events`.
- 
+### Vanmoof API
+
+To initially get a bike, connect to the VanMoof webapi and retrieve the first bike
+
+```swift
+let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
+```
+
+### From details
+
+If you already have your bike details, e.G. because you downloaded them earlier from the VanMoof site, you can construct the bike details manually.
+Make sure that you've got the `bleProfile`, the `macAddress` and the `key` correct, otherwise the connection will not be established.
+
+```swift
+let details = BikeDetails(
+    name: "MyCoolBike",
+    frameNumber: "ABC123456",
+    bleProfile: "SMARTBIKE_2018",
+    modelName: "VM01-145-2G",
+    macAddress: "12:34:56:78:9A:BC",
+    encryptionKey: "1234567890abcdef",
+    smartModuleVersion: "1.2.0"
+)
+
+let bike = try await Bike(scanningForBikeMatchingDetails: details)
+```
+
+### Codable
+
+Bikes implement Codable and thus can be serialized / deserialized should the need arise.
+
+```swift
+
+// write bike
+
+let data = try? JSONEncoder().encode(bike)
+
+// read it back
+
+let otherBike = JSONDecoder().decode(Bike.self, from: data)
+```
