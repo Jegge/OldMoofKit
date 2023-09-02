@@ -106,7 +106,7 @@ To retrieve the current connection state, query the bike's `state`:
 let state = bike.state
 ```
 
-You may also subscripe ot the `statePublisher' and be informed when the current state changes. Make sure to receive the state changes on the correct thread.
+You may also subscribe ot the `statePublisher' and be informed when the current state changes. Make sure to receive the state changes on the correct thread.
 
 ```swift
 let subscription: AnyCancellable = bike.statePublisher.receive(on: RunLoop.main).sink { state in
@@ -116,6 +116,28 @@ let subscription: AnyCancellable = bike.statePublisher.receive(on: RunLoop.main)
 // when disconnecting, do not forget to cancel your subscription:
 subscription.cancel()
 ```
+
+## Properties
+
+The bike has all kind of properties that represent the current known state of the bike, as:
+
+- lock (locked, unlocked)
+- alarm (on, off, automatic)
+- lighting (always on, automatic, off)
+- battery level and state (charging, discharging and percent charged)
+- module state (sleeping, off, on)
+- current error code (raw data, depending on the bike model)
+- motor assistance (off, one, two, three, four)
+- muted sounds (wake up sound, shutdown sound, lock sound, unlock sound)
+- speed (current speed in km/h)
+- distance (distance in km)
+- region (eu, us, japan, offroad)
+- unit (metric, imperial)
+
+`Note:` if your bike does not support a properity, it will be `nil`.
+
+For each property there is an associated `Publisher` that allows monitoring changes of value.
+
 
 
 
