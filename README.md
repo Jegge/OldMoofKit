@@ -22,8 +22,9 @@ bike.disconnect()
 ## Features
 
 - [x] Establish a bluetooth connection to a VanMoof Bike using async/await
-- [x] Easily change the configuration of the bike such as power level, light mode and many more
-- [x] Combine support to react to changes of certain functions
+- [x] Lock or unlock your bike
+- [x] Change the bike settings: light, motor assistance, ...
+- [x] Combine support to react to value changes
 
 ## Supported bikes
 
@@ -33,12 +34,12 @@ SmartBike       | :white_check_mark: |  :x:                | [vanbike-lib](https
 SmartS/X        | :white_check_mark: |  :white_check_mark: | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
 Electrified S/X | :white_check_mark: |  :x:                | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
 S/X 2           | :white_check_mark: |  :white_check_mark: | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
-S/X 3           |  :x:               |  :x:                | [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit), [PyMoof](https://github.com/quantsini/pymoof/tree/main)
+S/X 3           | :x:                |  :x:                | [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit), [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
 
 ## Info.plist
 
-As the VanMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/documentation/corebluetooth) framework to establish a [BLE](https://wikipedia.org/wiki/Bluetooth_Low_Energy) connection to a bike the [`NSBluetoothAlwaysUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nsbluetoothalwaysusagedescription) key needs to be added to the Info.plist of your application.
+As the OldMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/documentation/corebluetooth) framework to establish a [BLE](https://wikipedia.org/wiki/Bluetooth_Low_Energy) connection to a bike the [`NSBluetoothAlwaysUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nsbluetoothalwaysusagedescription) key needs to be added to the Info.plist of your application.
 
 ```xml
 <key>NSBluetoothAlwaysUsageDescription</key>
@@ -49,7 +50,7 @@ As the VanMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/doc
 
 ### From VanMoof web api
 
-To initially get a bike, connect to the VanMoof webapi and retrieve the first bike
+To initially get a bike, connect to the VanMoof web api and retrieve the first bike
 
 ```swift
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
@@ -77,7 +78,7 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 
 ### Codable
 
-Bikes implement Codable and thus can be serialized / deserialized should the need arise.
+Bikes implements [`Codable`](https://developer.apple.com/documentation/swift/codable?changes=_4)and thus can be serialized / deserialized should the need arise.
 
 ```swift
 
