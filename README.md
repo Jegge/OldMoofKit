@@ -29,10 +29,10 @@ bike.disconnect()
 
 Model           | Supported          | Tested              | Alternatives
 :-------------- | :----------------: | :-----------------: | :-------------
-SmartBike       | :white_check_mark: |  :x:                | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
-SmartS/X        | :white_check_mark: |  :white_check_mark: | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
-Electrified S/X | :white_check_mark: |  :x:                | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
-S/X 2           | :white_check_mark: |  :white_check_mark: | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+SmartBike       | :white_check_mark: |  :x:                | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+SmartS/X        | :white_check_mark: |  :white_check_mark: | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+Electrified S/X | :white_check_mark: |  :x:                | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+S/X 2           | :white_check_mark: |  :white_check_mark: | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
 S/X 3           |  :x:               |  :x:                | [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit), [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
 
@@ -186,7 +186,7 @@ try await bike.wakeup()
 ## Credits and inspirations
 
 * [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit)
-* [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+* [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
 * [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
 ## License
