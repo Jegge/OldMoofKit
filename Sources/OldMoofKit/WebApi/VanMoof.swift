@@ -77,7 +77,7 @@ public struct VanMoof {
         self.refreshToken = refreshToken
     }
 
-    public func bikeProperties () async throws -> [BikeProperties] {
+    public func bikeProperties () async throws -> (Data, [BikeProperties]) {
         if self.token == "" || self.refreshToken == "" {
             throw VanMoofError.notAuthenticated
         }
@@ -113,7 +113,14 @@ public struct VanMoof {
             throw VanMoofError.expectedBikeDetails
         }
 
-        return try VanMoof.bikeProperties(from: bikeDetails)
+        let propertyData = try JSONSerialization.data(withJSONObject: bikeDetails)
+        let properties = try VanMoof.bikeProperties(from: bikeDetails)
+        return (propertyData, properties)
+    }
+
+    public func bikeProperties () async throws -> [BikeProperties] {
+        let (_, properties) = try await self.bikeProperties()
+        return properties
     }
 
     fileprivate static func bikeProperties(from json: [[String: Any]]) throws -> [BikeProperties] {
@@ -157,8 +164,7 @@ public struct VanMoof {
 }
 
 public extension Array where Element == BikeProperties {
-    init(contentsOf url: URL) throws {
-        let data = try Data(contentsOf: url)
+    init(from data: Data) throws {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
             throw VanMoofError.malformedJson
         }
