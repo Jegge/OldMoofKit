@@ -17,7 +17,7 @@ public final class Bike: Codable {
     public let identifier: UUID
     public let details: BikeDetails
 
-    public let connectionStatePublisher = PassthroughSubject<BikeState, Never>()
+    public let statePublisher = PassthroughSubject<BikeState, Never>()
     public let errorPublisher = PassthroughSubject<Error, Never>()
     public let lockPublisher = PassthroughSubject<Lock, Never>()
     public let alarmPublisher = PassthroughSubject<Alarm, Never>()
@@ -157,7 +157,7 @@ public final class Bike: Codable {
         try container.encode(self.details, forKey: .details)
     }
 
-      private func readRequest<T> (_ request: ReadRequest<T>?) async throws -> T? {
+    private func readRequest<T> (_ request: ReadRequest<T>?) async throws -> T? {
         guard let request = request else {
             return nil
         }
@@ -378,7 +378,7 @@ public final class Bike: Codable {
         try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
     }
 
-    public func set(mutedSounds value: MutedSounds) async throws {
+    public func set (mutedSounds value: MutedSounds) async throws {
         print("Setting muted sounds to \(value.description)")
         try await self.writeRequest(self.profile.createMutedSoundsWriteRequest(value: value))
     }
@@ -409,7 +409,7 @@ public final class Bike: Codable {
                 Task {
                     do {
                         try await self.setupConnection()
-                        self.connectionStatePublisher.send(.connected)
+                        self.statePublisher.send(.connected)
                     } catch {
                         self.errorPublisher.send(error)
                     }
@@ -417,7 +417,7 @@ public final class Bike: Codable {
 
             case .disconnected:
                 self.notificationCallbacks = [:]
-                self.connectionStatePublisher.send(.disconnected)
+                self.statePublisher.send(.disconnected)
             }
         }
 
