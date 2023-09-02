@@ -53,8 +53,8 @@ let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
 
 ### From details
 
-If you already have your bike details, e.G. because you downloaded them earlier from the VanMoof site, you can construct the bike details manually.
-Make sure that you've got the `bleProfile`, the `macAddress` and the `key` correct, otherwise the connection will not be established.
+If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually.
+Make sure that you've got the `bleProfile`, the `macAddress` and the `key` correct, otherwise the connection will not be established. The other parameters are solely flavour text.
 
 ```swift
 let details = BikeDetails(
@@ -84,3 +84,39 @@ let data = try? JSONEncoder().encode(bike)
 
 let otherBike = JSONDecoder().decode(Bike.self, from: data)
 ```
+
+
+## Connection
+
+Connecting a bike is straightforward, just call the `connect` method. 
+
+```swift
+try await bike.connect()
+```
+
+The bike will stay connected (and in fact automatically re-establish a broken connection) as long as you do not manuall disconnect it.
+
+```swift
+bike.disconnect()
+```
+
+To retrieve the current connection state, query the bike's `state`:
+
+```swift
+let state = bike.state
+```
+
+You may also subscripe ot the `statePublisher' and be informed when the current state changes. Make sure to receive the state changes on the correct thread.
+
+```swift
+let subscription: AnyCancellable = bike.statePublisher.receive(on: RunLoop.main).sink { state in
+    // react to state ...
+}
+
+// when disconnecting, do not forget to cancel your subscription:
+subscription.cancel()
+```
+
+
+
+
