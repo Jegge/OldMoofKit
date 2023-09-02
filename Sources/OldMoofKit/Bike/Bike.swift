@@ -36,13 +36,13 @@ public final class Bike: Codable {
     private var key: Data
     private var profile: Profile
     private var connection: BluetoothConnection?
-    private var state: AnyCancellable?
-    private var errors: AnyCancellable?
-    private var notifications: AnyCancellable?
+    private var bluetoothState: AnyCancellable?
+    private var bluetoothErrors: AnyCancellable?
+    private var bluetoothNotifications: AnyCancellable?
     private var notificationCallbacks: [CBUUID: ((Data?) -> Void)] = [:]
 
-    public var isConnected: Bool {
-        return self.connection?.isConnected ?? false
+    public var state: BikeState {
+        return (self.connection?.isConnected == true) ? .connected : .disconnected
     }
 
     public var signalStrength: Int {
@@ -403,7 +403,7 @@ public final class Bike: Codable {
 
         self.connection = BluetoothConnection(identifier: self.identifier, reconnectInterval: 1)
 
-        self.state = self.connection?.state.sink { state in
+        self.bluetoothState = self.connection?.state.sink { state in
             switch state {
             case .connected:
                 Task {
@@ -421,11 +421,11 @@ public final class Bike: Codable {
             }
         }
 
-        self.errors = self.connection?.errors.sink { error in
+        self.bluetoothErrors = self.connection?.errors.sink { error in
             self.errorPublisher.send(error)
         }
 
-        self.notifications = self.connection?.notifications.sink { notification in
+        self.bluetoothNotifications = self.connection?.notifications.sink { notification in
             self.notificationCallbacks[notification.uuid]?(notification.data)
         }
 
@@ -435,11 +435,11 @@ public final class Bike: Codable {
     public func disconnect () {
         self.connection?.disconnectPeripheral()
         self.connection = nil
-        self.state?.cancel()
-        self.errors?.cancel()
-        self.notifications?.cancel()
-        self.state = nil
-        self.errors = nil
-        self.notifications = nil
+        self.bluetoothState?.cancel()
+        self.bluetoothErrors?.cancel()
+        self.bluetoothNotifications?.cancel()
+        self.bluetoothState = nil
+        self.bluetoothErrors = nil
+        self.bluetoothNotifications = nil
     }
 }
