@@ -387,7 +387,7 @@ public final class Bike: Codable {
         try await self.writeRequest(self.profile.createBackupCodeWriteRequest(code: code))
     }
 
-    public func connect () {
+    public func connect () async throws {
         if self.connection != nil {
             return
         }
@@ -413,7 +413,7 @@ public final class Bike: Codable {
             }
         }
 
-        connection?.connect()
+        try await connection?.connect()
     }
 
     public func disconnect () {

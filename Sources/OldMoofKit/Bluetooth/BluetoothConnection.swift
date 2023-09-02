@@ -25,6 +25,8 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
     private var writeContinuation: CheckedContinuation<Void, Error>?
     private var rssiContinuation: CheckedContinuation<Int, Error>?
 
+    private var connectContinuation: CheckedContinuation<Void, Error>?
+
     let events: PassthroughSubject<BluetoothEvent, Never> = PassthroughSubject<BluetoothEvent, Never>()
 
     let identifier: UUID
@@ -39,9 +41,17 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         self.reconnectInterval = reconnectInterval
     }
 
-    internal func connect () {
+    internal func connect () async throws {
         if self.central == nil {
-            self.central = CBCentralManager(delegate: self, queue: self.queue)
+            try await withCheckedThrowingContinuation { continuation in
+                self.connectContinuation = continuation
+                self.central = CBCentralManager(delegate: self, queue: self.queue)
+            }
+        } else if self.central?.state == .poweredOn, let peripheral = self.central?.retrievePeripherals(withIdentifiers: [self.identifier]).first {
+            try await withCheckedThrowingContinuation { continuation in
+                self.connectContinuation = continuation
+                self.connectPeripheral(peripheral, afterDelay: .zero)
+            }
         }
     }
 
@@ -51,18 +61,22 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
             if let peripheral = self.central?.retrievePeripherals(withIdentifiers: [self.identifier]).first {
                 self.connectPeripheral(peripheral, afterDelay: .zero)
             } else {
-                 self.events.send(.error(BluetoothError.peripheralNotFound))
+                self.events.send(.error(BluetoothError.peripheralNotFound))
+                self.connectContinuation?.resume(throwing: BluetoothError.peripheralNotFound)
             }
 
         case .poweredOff:
             self.disconnectPeripheral()
             self.events.send(.error(BluetoothError.poweredOff))
+            self.connectContinuation?.resume(throwing: BluetoothError.poweredOff)
 
         case .unauthorized:
             self.events.send(.error(BluetoothError.unauthorized))
+            self.connectContinuation?.resume(throwing: BluetoothError.unauthorized)
 
         case .unsupported:
             self.events.send(.error(BluetoothError.unsupported))
+            self.connectContinuation?.resume(throwing: BluetoothError.unsupported)
 
         default:
             print("Central entered unexpected state: \(central.state)")
@@ -72,6 +86,8 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
     internal func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         if let error = error {
             self.events.send(.error(error))
+            self.connectContinuation?.resume(throwing: error)
+            self.connectContinuation = nil
         }
         self.disconnectPeripheral()
         self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
@@ -79,7 +95,9 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
 
     internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         if let error = error {
-           self.events.send(.error(error))
+            self.events.send(.error(error))
+            self.connectContinuation?.resume(throwing: error)
+            self.connectContinuation = nil
         }
         self.disconnectPeripheral()
         self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
@@ -127,6 +145,8 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let error = error {
             self.events.send(.error(error))
+            self.connectContinuation?.resume(throwing: error)
+            self.connectContinuation = nil
             return
         }
 
@@ -138,6 +158,8 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error = error {
             self.events.send(.error(error))
+            self.connectContinuation?.resume(throwing: error)
+            self.connectContinuation = nil
             return
         }
 
@@ -148,6 +170,8 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         let discoveredServicesCount = Set(self.characteristics.values.compactMap { $0.service?.uuid }).count
         if discoveredServicesCount == (peripheral.services?.count ?? 0) {
             self.events.send(.connected)
+            self.connectContinuation?.resume()
+            self.connectContinuation = nil
         }
     }
 
