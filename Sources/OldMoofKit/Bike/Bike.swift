@@ -131,14 +131,14 @@ public final class Bike: Codable {
         let identifier = try container.decode(UUID.self, forKey: .identifier)
         let details = try container.decode(BikeDetails.self, forKey: .details)
         guard let profile = details.profile else {
-            throw BikeConnectionError.bikeNotSupported
+            throw BikeError.bikeNotSupported
         }
         self.init(identifier: identifier, details: details, profile: profile)
     }
 
     public convenience init (scanningForBikeMatchingDetails details: BikeDetails, timeout seconds: TimeInterval = 30) async throws {
         guard let profile = details.profile else {
-            throw BikeConnectionError.bikeNotSupported
+            throw BikeError.bikeNotSupported
         }
         let scanner = BluetoothScanner()
         let identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)
@@ -156,7 +156,7 @@ public final class Bike: Codable {
             return nil
         }
         guard let connection = self.connection else {
-            throw BikeConnectionError.notConnected
+            throw BikeError.notConnected
         }
 
         var data = try await connection.readValue(for: request.uuid)
@@ -172,7 +172,7 @@ public final class Bike: Codable {
             return
         }
         guard let connection = self.connection else {
-            throw BikeConnectionError.notConnected
+            throw BikeError.notConnected
         }
 
         let challenge = try await self.readRequest(self.profile.createChallengeReadRequest())
@@ -195,7 +195,7 @@ public final class Bike: Codable {
             return
         }
         guard let connection = self.connection else {
-            throw BikeConnectionError.notConnected
+            throw BikeError.notConnected
         }
         connection.setNotifyValue(enabled: true, for: request.uuid) { data in
             var data = data
@@ -381,7 +381,7 @@ public final class Bike: Codable {
 
     public func set (backupCode code: Int) async throws {
         if code < 111 || code > 999 {
-            throw BikeConnectionError.codeOutOfRange
+            throw BikeError.codeOutOfRange
         }
         print("Setting backup code to \(code).")
         try await self.writeRequest(self.profile.createBackupCodeWriteRequest(code: code))

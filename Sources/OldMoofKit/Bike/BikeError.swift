@@ -7,13 +7,13 @@
 
 import Foundation
 
-enum BikeConnectionError: Error {
+enum BikeError: Error {
     case bikeNotSupported
     case notConnected
     case codeOutOfRange
 }
 
-extension BikeConnectionError: LocalizedError {
+extension BikeError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .bikeNotSupported:
