@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-internal class BluetoothScanner: NSObject, CBCentralManagerDelegate {
+class BluetoothScanner: NSObject, CBCentralManagerDelegate {
     private let queue = DispatchQueue(label: "com.realvirtuality.bluetooth.scanner", qos: .background)
     private var central: CBCentralManager?
     private var timer: Timer?

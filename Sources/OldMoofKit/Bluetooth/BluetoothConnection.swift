@@ -8,17 +8,7 @@
 import CoreBluetooth
 import Combine
 
-internal enum BluetoothState {
-    case connected
-    case disconnected
-}
-
-internal struct BluetoothNotification {
-    let uuid: CBUUID
-    let data: Data?
-}
-
-internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private let queue = DispatchQueue(label: "com.realvirtuality.bluetooth.connection", qos: .background)
     private var central: CBCentralManager?
     private var peripheral: CBPeripheral!
@@ -40,12 +30,12 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         return self.peripheral?.state == .connected
     }
 
-    internal init (identifier: UUID, reconnectInterval: TimeInterval) {
+    init (identifier: UUID, reconnectInterval: TimeInterval) {
         self.identifier = identifier
         self.reconnectInterval = reconnectInterval
     }
 
-    internal func connect () async throws {
+    func connect () async throws {
         if self.central == nil {
             try await withCheckedThrowingContinuation { continuation in
                 self.connectContinuation = continuation
@@ -59,7 +49,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    internal func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
             if let peripheral = self.central?.retrievePeripherals(withIdentifiers: [self.identifier]).first {
@@ -87,7 +77,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    internal func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         if let error = error {
             self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
@@ -97,7 +87,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
     }
 
-    internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         if let error = error {
             self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
@@ -107,7 +97,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
     }
 
-    internal func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         self.peripheral?.discoverServices(nil)
     }
 
@@ -144,7 +134,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         self.state.send(.disconnected)
     }
 
-    internal func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let error = error {
             self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
@@ -157,7 +147,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    internal func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error = error {
             self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
@@ -191,7 +181,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    internal func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if characteristic.isNotifying {
             if let error = error {
                 self.errors.send(error)
@@ -225,7 +215,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    internal func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         let continuation = self.writeContinuation
         self.writeContinuation = nil
         self.semaphore.signal()
@@ -253,7 +243,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    internal func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
         let continuation = self.rssiContinuation
         self.rssiContinuation = nil
 

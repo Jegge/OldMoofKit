@@ -14,15 +14,10 @@ public final class Bike: Codable {
         case details
     }
 
-    public enum ConnectionState {
-        case connected
-        case disconnected
-    }
-
     public let identifier: UUID
     public let details: BikeDetails
 
-    public let connectionStatePublisher = PassthroughSubject<Bike.ConnectionState, Never>()
+    public let connectionStatePublisher = PassthroughSubject<BikeState, Never>()
     public let errorPublisher = PassthroughSubject<Error, Never>()
     public let lockPublisher = PassthroughSubject<Lock, Never>()
     public let alarmPublisher = PassthroughSubject<Alarm, Never>()

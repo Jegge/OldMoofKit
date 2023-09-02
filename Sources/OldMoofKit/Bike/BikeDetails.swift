@@ -8,7 +8,6 @@
 import Foundation
 
 public struct BikeDetails: Codable {
-
     public init(name: String, frameNumber: String, bleProfile: String, modelName: String, macAddress: String, encryptionKey: String, smartModuleVersion: String?) {
         self.name = name
         self.frameNumber = frameNumber
