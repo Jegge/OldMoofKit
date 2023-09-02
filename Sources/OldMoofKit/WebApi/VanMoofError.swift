@@ -8,24 +8,12 @@
 import Foundation
 
 enum VanMoofError: Error {
-    case malformedReply
-    case expectedToken
-    case expectedRefreshToken
+    case invalidData
+    case expected(element: String)
     case invalidStatusCode(_ code: Int)
     case notAuthenticated
     case unauthorized
-    case expectedData
-    case expectedBikeDetails
-    case expectedName
-    case expectedFrameNumber
-    case expectedBleProfile
-    case expectedModelName
-    case expectedMacAddress
-    case expectedKey
-    case expectedEncryptionKey
-    case malformedEncryptionKey
-    case malformedJson
-    case invalidData
+    case noSupportedBikesFound
 }
 
 extension VanMoofError: LocalizedError {
@@ -33,10 +21,16 @@ extension VanMoofError: LocalizedError {
         switch self {
         case .unauthorized:
             return NSLocalizedString("The provided username or password is not valid.", comment: "Invalid Username or Password")
-        case .malformedJson:
+        case .notAuthenticated:
+            return NSLocalizedString("The api needs to be authenticated first.", comment: "Invalid api usage")
+        case .invalidData:
             return NSLocalizedString("The file did not contain expected JSON data.", comment: "malformed json")
-        default:
-            return "Bike Api Error (\(self))"
+        case .noSupportedBikesFound:
+            return NSLocalizedString("There are no supported bikes linked to the given account or in the given JSON file.", comment: "Error description: noSupportedBikesFound")
+        case .expected(let element):
+            return String(format: NSLocalizedString("Did not find expected element '%@' in JSON data.", comment: "Error description: expected element"), element)
+        case .invalidStatusCode(let code):
+            return String(format: NSLocalizedString("Did receive HTTP unexpected status code %@.", comment: "Error description: expected element"), code)
         }
     }
 }

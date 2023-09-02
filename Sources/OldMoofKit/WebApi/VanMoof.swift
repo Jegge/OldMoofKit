@@ -23,18 +23,19 @@ public struct VanMoof {
         static let smartmoduleCurrentVersion = "smartmoduleCurrentVersion"
     }
 
-    let baseURL: URL
+    let apiUrl: URL
     let apiKey: String
 
     private var token: String = ""
     private var refreshToken: String = ""
 
-    public init () {
-        self.init(baseURL: URL(string: "https://my.vanmoof.com/api/v8/")!, apiKey: "fcb38d47-f14b-30cf-843b-26283f6a5819")
+    public struct Api {
+        public static let url: URL = URL(string: "https://my.vanmoof.com/api/v8/")!
+        public static let key: String = "fcb38d47-f14b-30cf-843b-26283f6a5819"
     }
 
-    public init(baseURL: URL, apiKey: String) {
-        self.baseURL = baseURL
+    public init(apiUrl: URL, apiKey: String) {
+        self.apiUrl = apiUrl
         self.apiKey = apiKey
     }
 
@@ -44,7 +45,7 @@ public struct VanMoof {
 
         let authorization = Data("\(username):\(password)".utf8).base64EncodedString()
 
-        var request = URLRequest(url: self.baseURL.appendingPathComponent("authenticate"))
+        var request = URLRequest(url: self.apiUrl.appendingPathComponent("authenticate"))
         request.setValue("Basic \(authorization)", forHTTPHeaderField: "Authorization")
         request.setValue(self.apiKey, forHTTPHeaderField: "Api-Key")
         request.httpMethod  = "POST"
@@ -52,7 +53,7 @@ public struct VanMoof {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw VanMoofError.malformedReply
+            throw VanMoofError.invalidData
         }
 
         if httpResponse.statusCode == 401 {
@@ -64,13 +65,13 @@ public struct VanMoof {
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: AnyObject] else {
-            throw VanMoofError.malformedReply
+            throw VanMoofError.invalidData
         }
         guard let token = json[Key.token] as? String else {
-            throw VanMoofError.expectedToken
+            throw VanMoofError.expected(element: Key.token)
         }
         guard let refreshToken = json[Key.refreshToken] as? String else {
-            throw VanMoofError.expectedRefreshToken
+            throw VanMoofError.expected(element: Key.refreshToken)
         }
 
         self.token = token
@@ -82,7 +83,7 @@ public struct VanMoof {
             throw VanMoofError.notAuthenticated
         }
 
-        var request = URLRequest(url: self.baseURL.appendingPathComponent("getCustomerData?includeBikeDetails"))
+        var request = URLRequest(url: self.apiUrl.appendingPathComponent("getCustomerData?includeBikeDetails"))
         request.setValue( "Bearer \(self.token)", forHTTPHeaderField: "Authorization")
         request.setValue(self.apiKey, forHTTPHeaderField: "Api-Key")
         request.httpMethod  = "GET"
@@ -90,7 +91,7 @@ public struct VanMoof {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw VanMoofError.malformedReply
+            throw VanMoofError.invalidData
         }
 
         if httpResponse.statusCode == 401 {
@@ -102,15 +103,15 @@ public struct VanMoof {
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw VanMoofError.malformedJson
+            throw VanMoofError.invalidData
         }
 
         guard let jsonData = json[Key.data] as? [String: Any] else {
-            throw VanMoofError.expectedData
+            throw VanMoofError.expected(element: Key.data)
         }
 
         guard let bikeDetails = jsonData[Key.bikeDetails] as? [[String: Any]] else {
-            throw VanMoofError.expectedBikeDetails
+            throw VanMoofError.expected(element: Key.bikeDetails)
         }
 
         let detailData = try JSONSerialization.data(withJSONObject: bikeDetails)
@@ -126,39 +127,39 @@ public struct VanMoof {
     fileprivate static func bikeDetails(from json: [[String: Any]]) throws -> [BikeDetails] {
         return try json.compactMap { detail in
             guard let name = detail[VanMoof.Key.name] as? String else {
-                throw VanMoofError.expectedName
+                throw VanMoofError.expected(element: VanMoof.Key.name)
             }
             guard let frameNumber = detail[VanMoof.Key.frameNumber] as? String else {
-                throw VanMoofError.expectedFrameNumber
+                throw VanMoofError.expected(element: VanMoof.Key.frameNumber)
             }
             guard let bleProfile = detail[VanMoof.Key.bleProfile] as? String else {
-                throw VanMoofError.expectedBleProfile
+                throw VanMoofError.expected(element: VanMoof.Key.bleProfile)
             }
             guard let modelName = detail[VanMoof.Key.modelName] as? String else {
-                throw VanMoofError.expectedModelName
+                throw VanMoofError.expected(element: VanMoof.Key.modelName)
             }
             guard let macAddress = detail[VanMoof.Key.macAddress] as? String else {
-                throw VanMoofError.expectedMacAddress
+                throw VanMoofError.expected(element: VanMoof.Key.macAddress)
             }
             guard let key = detail[VanMoof.Key.key] as? [String: Any] else {
-                throw VanMoofError.expectedKey
+                throw VanMoofError.expected(element: VanMoof.Key.key)
             }
             guard let encryptionKey = key[VanMoof.Key.encryptionKey] as? String else {
-                throw VanMoofError.expectedEncryptionKey
+                throw VanMoofError.expected(element: VanMoof.Key.encryptionKey)
             }
             guard let encryptionKey = Data(hexString: encryptionKey) else {
-                throw VanMoofError.malformedEncryptionKey
+                throw VanMoofError.expected(element: VanMoof.Key.encryptionKey)
             }
 
             let version = detail[VanMoof.Key.smartmoduleCurrentVersion] as? String
 
             return BikeDetails(name: name,
-                                  frameNumber: frameNumber,
-                                  bleProfile: bleProfile,
-                                  modelName: modelName,
-                                  macAddress: macAddress,
-                                  key: encryptionKey,
-                                  smartModuleVersion: version)
+                               frameNumber: frameNumber,
+                               bleProfile: bleProfile,
+                               modelName: modelName,
+                               macAddress: macAddress,
+                               key: encryptionKey,
+                               smartModuleVersion: version)
         }
     }
 }
@@ -166,9 +167,24 @@ public struct VanMoof {
 public extension Array where Element == BikeDetails {
     init(from data: Data) throws {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
-            throw VanMoofError.malformedJson
+            throw VanMoofError.invalidData
         }
         let bikes = try VanMoof.bikeDetails(from: json)
         self.init(bikes)
+    }
+}
+
+public extension Bike {
+    convenience init (username: String, password: String) async throws {
+        try await self.init(apiUrl: VanMoof.Api.url, apiKey: VanMoof.Api.key, username: username, password: password)
+    }
+
+    convenience init (apiUrl: URL, apiKey: String, username: String, password: String) async throws {
+        var api = VanMoof(apiUrl: apiUrl, apiKey: apiKey)
+        try await api.authenticate(username: username, password: password)
+        guard let details = try await api.bikeDetails().first else {
+            throw VanMoofError.noSupportedBikesFound
+        }
+        try await self.init(scanningForBikeMatchingDetails: details)
     }
 }
