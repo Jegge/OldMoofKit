@@ -38,6 +38,7 @@ public final class Bike: Codable {
 
     public let events: PassthroughSubject<BikeEvent, Never> = PassthroughSubject<BikeEvent, Never>()
 
+    private var key: Data
     private var profile: Profile
     private var connection: BluetoothConnection?
     private var bluetoothEvents: AnyCancellable?
@@ -124,6 +125,7 @@ public final class Bike: Codable {
         self.identifier = identifier
         self.details = details
         self.profile = profile
+        self.key = Data(hexString: details.encryptionKey) ?? Data()
     }
 
     public convenience init (from decoder: Decoder) throws {
@@ -161,7 +163,7 @@ public final class Bike: Codable {
 
         var data = try await connection.readValue(for: request.uuid)
         if request.decrypt {
-            data = try data?.decrypt_aes_ecb_zero(key: self.details.key)
+            data = try data?.decrypt_aes_ecb_zero(key: self.key)
         }
 
         return request.parse(data)
@@ -186,7 +188,7 @@ public final class Bike: Codable {
 
         data += request.data
 
-        let payload = try data.encrypt_aes_ecb_zero(key: self.details.key)
+        let payload = try data.encrypt_aes_ecb_zero(key: self.key)
         try await connection.writeValue(payload, for: request.uuid)
     }
 
@@ -201,7 +203,7 @@ public final class Bike: Codable {
             var data = data
             do {
                 if request.decrypt {
-                    data = try data?.decrypt_aes_ecb_zero(key: self.details.key)
+                    data = try data?.decrypt_aes_ecb_zero(key: self.key)
                 }
                 if let payload = request.parse(data) {
                     callback(payload)
@@ -214,7 +216,7 @@ public final class Bike: Codable {
 
     private func setupConnection () async throws {
         print("Authenticating...")
-        try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.details.key))
+        try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.key))
 
         print("Reading parameters...")
         if let parameters = try await self.readRequest(self.profile.createParametersReadRequest()) {

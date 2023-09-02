@@ -1,7 +1,7 @@
 import Foundation
 import CommonCrypto
 
-public enum CCryptError: Error {
+enum CCryptError: Error {
     case success
     case paramError
     case bufferTooSmall

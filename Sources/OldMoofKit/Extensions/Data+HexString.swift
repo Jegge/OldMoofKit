@@ -1,6 +1,6 @@
 import Foundation
 
-public extension Data {
+extension Data {
     init?(hexString: String) {
         var data = Data(capacity: hexString.count / 2)
         var index = hexString.startIndex

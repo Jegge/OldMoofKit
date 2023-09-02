@@ -147,19 +147,16 @@ public struct VanMoof {
             guard let encryptionKey = key[VanMoof.Key.encryptionKey] as? String else {
                 throw VanMoofError.expected(element: VanMoof.Key.encryptionKey)
             }
-            guard let encryptionKey = Data(hexString: encryptionKey) else {
-                throw VanMoofError.expected(element: VanMoof.Key.encryptionKey)
-            }
 
-            let version = detail[VanMoof.Key.smartmoduleCurrentVersion] as? String
+            let smartModuleVersion = detail[VanMoof.Key.smartmoduleCurrentVersion] as? String
 
             return BikeDetails(name: name,
                                frameNumber: frameNumber,
                                bleProfile: bleProfile,
                                modelName: modelName,
                                macAddress: macAddress,
-                               key: encryptionKey,
-                               smartModuleVersion: version)
+                               encryptionKey: encryptionKey,
+                               smartModuleVersion: smartModuleVersion)
         }
     }
 }
