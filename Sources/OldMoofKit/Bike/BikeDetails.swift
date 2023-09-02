@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct BikeProperties: Codable {
+public struct BikeDetails: Codable {
 
     public init(name: String, frameNumber: String, bleProfile: String, modelName: String, macAddress: String, key: Data, smartModuleVersion: String?) {
         self.name = name

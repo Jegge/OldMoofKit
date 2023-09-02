@@ -77,7 +77,7 @@ public struct VanMoof {
         self.refreshToken = refreshToken
     }
 
-    public func bikeProperties () async throws -> (Data, [BikeProperties]) {
+    public func bikeDetails () async throws -> (Data, [BikeDetails]) {
         if self.token == "" || self.refreshToken == "" {
             throw VanMoofError.notAuthenticated
         }
@@ -113,17 +113,17 @@ public struct VanMoof {
             throw VanMoofError.expectedBikeDetails
         }
 
-        let propertyData = try JSONSerialization.data(withJSONObject: bikeDetails)
-        let properties = try VanMoof.bikeProperties(from: bikeDetails)
-        return (propertyData, properties)
+        let detailData = try JSONSerialization.data(withJSONObject: bikeDetails)
+        let details = try VanMoof.bikeDetails(from: bikeDetails)
+        return (detailData, details)
     }
 
-    public func bikeProperties () async throws -> [BikeProperties] {
-        let (_, properties) = try await self.bikeProperties()
+    public func bikeDetails () async throws -> [BikeDetails] {
+        let (_, properties) = try await self.bikeDetails()
         return properties
     }
 
-    fileprivate static func bikeProperties(from json: [[String: Any]]) throws -> [BikeProperties] {
+    fileprivate static func bikeDetails(from json: [[String: Any]]) throws -> [BikeDetails] {
         return try json.compactMap { detail in
             guard let name = detail[VanMoof.Key.name] as? String else {
                 throw VanMoofError.expectedName
@@ -152,7 +152,7 @@ public struct VanMoof {
 
             let version = detail[VanMoof.Key.smartmoduleCurrentVersion] as? String
 
-            return BikeProperties(name: name,
+            return BikeDetails(name: name,
                                   frameNumber: frameNumber,
                                   bleProfile: bleProfile,
                                   modelName: modelName,
@@ -163,12 +163,12 @@ public struct VanMoof {
     }
 }
 
-public extension Array where Element == BikeProperties {
+public extension Array where Element == BikeDetails {
     init(from data: Data) throws {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
             throw VanMoofError.malformedJson
         }
-        let bikes = try VanMoof.bikeProperties(from: json)
+        let bikes = try VanMoof.bikeDetails(from: json)
         self.init(bikes)
     }
 }

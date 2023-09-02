@@ -30,11 +30,11 @@ public enum BikeEvent {
 public final class Bike: Codable {
     enum CodingKeys: String, CodingKey {
         case identifier
-        case properties
+        case details
     }
 
     public let identifier: UUID
-    public let properties: BikeProperties
+    public let details: BikeDetails
 
     public let events: PassthroughSubject<BikeEvent, Never> = PassthroughSubject<BikeEvent, Never>()
 
@@ -120,35 +120,35 @@ public final class Bike: Codable {
         }
     }
 
-    private init (identifier: UUID, properties: BikeProperties, profile: Profile) {
+    private init (identifier: UUID, details: BikeDetails, profile: Profile) {
         self.identifier = identifier
-        self.properties = properties
+        self.details = details
         self.profile = profile
     }
 
     public convenience init (from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let identifier = try container.decode(UUID.self, forKey: .identifier)
-        let properties = try container.decode(BikeProperties.self, forKey: .properties)
-        guard let profile = properties.profile else {
+        let details = try container.decode(BikeDetails.self, forKey: .details)
+        guard let profile = details.profile else {
             throw BikeConnectionError.bikeNotSupported
         }
-        self.init(identifier: identifier, properties: properties, profile: profile)
+        self.init(identifier: identifier, details: details, profile: profile)
     }
 
-    public convenience init (scanningForBikeMatchingProperties properties: BikeProperties, timeout seconds: TimeInterval = 30) async throws {
-        guard let profile = properties.profile else {
+    public convenience init (scanningForBikeMatchingDetails details: BikeDetails, timeout seconds: TimeInterval = 30) async throws {
+        guard let profile = details.profile else {
             throw BikeConnectionError.bikeNotSupported
         }
         let scanner = BluetoothScanner()
-        let identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: properties.deviceName, timeout: seconds)
-        self.init(identifier: identifier, properties: properties, profile: profile)
+        let identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)
+        self.init(identifier: identifier, details: details, profile: profile)
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.identifier, forKey: .identifier)
-        try container.encode(self.properties, forKey: .properties)
+        try container.encode(self.details, forKey: .details)
     }
 
       private func readRequest<T> (_ request: ReadRequest<T>?) async throws -> T? {
@@ -161,7 +161,7 @@ public final class Bike: Codable {
 
         var data = try await connection.readValue(for: request.uuid)
         if request.decrypt {
-            data = try data?.decrypt_aes_ecb_zero(key: self.properties.key)
+            data = try data?.decrypt_aes_ecb_zero(key: self.details.key)
         }
 
         return request.parse(data)
@@ -186,7 +186,7 @@ public final class Bike: Codable {
 
         data += request.data
 
-        let payload = try data.encrypt_aes_ecb_zero(key: self.properties.key)
+        let payload = try data.encrypt_aes_ecb_zero(key: self.details.key)
         try await connection.writeValue(payload, for: request.uuid)
     }
 
@@ -201,7 +201,7 @@ public final class Bike: Codable {
             var data = data
             do {
                 if request.decrypt {
-                    data = try data?.decrypt_aes_ecb_zero(key: self.properties.key)
+                    data = try data?.decrypt_aes_ecb_zero(key: self.details.key)
                 }
                 if let payload = request.parse(data) {
                     callback(payload)
@@ -214,7 +214,7 @@ public final class Bike: Codable {
 
     private func setupConnection () async throws {
         print("Authenticating...")
-        try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.properties.key))
+        try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.details.key))
 
         print("Reading parameters...")
         if let parameters = try await self.readRequest(self.profile.createParametersReadRequest()) {

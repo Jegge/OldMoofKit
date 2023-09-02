@@ -12,7 +12,7 @@ struct Profiles {
     static let electrified2018 = Electified2018Profile()
 }
 
-extension BikeProperties {
+extension BikeDetails {
     internal var profile: Profile? {
         switch bleProfile {
         case "SMARTBIKE_2016": return Profiles.smartBike2016            // SmartBike

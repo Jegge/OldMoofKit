@@ -5,7 +5,7 @@
 ```swift
 import OldMoofKit
 
-let properties = BikeProperties(
+let details = BikeDetails(
     name: "MyCoolBike",
     frameNumber: "ABC123456",
     bleProfile: "SMARTBIKE_2018",
@@ -15,7 +15,7 @@ let properties = BikeProperties(
     smartModuleVersion: "1.2.0"
 )
 
-let bike = try await Bike(scanningForBikeMatchingProperties: properties)
+let bike = try await Bike(scanningForBikeMatchingDetails: details)
 
 let events = bike.events.receive(on: RunLoop.main).sink { event in
     switch event {
