@@ -6,6 +6,7 @@
 //
 
 import CoreBluetooth
+import OSLog
 
 class BluetoothScanner: NSObject, CBCentralManagerDelegate {
     private let queue = DispatchQueue(label: "com.realvirtuality.bluetooth.scanner", qos: .background)
@@ -59,7 +60,7 @@ class BluetoothScanner: NSObject, CBCentralManagerDelegate {
             self.continuation = nil
 
         default:
-            print("Central entered unexpected state: \(central.state)")
+            Logger.bluetooth.warning("Central entered unexpected state: \(String(describing: central.state))")
         }
     }
 

@@ -7,6 +7,7 @@
 
 import CoreBluetooth
 import Combine
+import OSLog
 
 class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private let queue = DispatchQueue(label: "com.realvirtuality.bluetooth.connection", qos: .background)
@@ -73,7 +74,7 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
             self.connectContinuation?.resume(throwing: BluetoothError.unsupported)
 
         default:
-            print("Central entered unexpected state: \(central.state)")
+            Logger.bluetooth.warning("Central entered unexpected state: \(String(describing: central.state))")
         }
     }
 
