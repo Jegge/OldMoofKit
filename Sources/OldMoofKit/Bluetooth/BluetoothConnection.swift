@@ -8,10 +8,14 @@
 import CoreBluetooth
 import Combine
 
-internal enum BluetoothEvent {
+internal enum BluetoothState {
     case connected
     case disconnected
-    case error(_ error: Error)
+}
+
+internal struct BluetoothNotification {
+    let uuid: CBUUID
+    let data: Data?
 }
 
 internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
@@ -19,15 +23,15 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
     private var central: CBCentralManager?
     private var peripheral: CBPeripheral!
     private var characteristics: [CBUUID: CBCharacteristic] = [:]
-    private var notifyCallbacks: [CBUUID: ((Data?) -> Void)] = [:]
     private var semaphore = DispatchSemaphore(value: 1)
     private var readContinuation: CheckedContinuation<Data?, Error>?
     private var writeContinuation: CheckedContinuation<Void, Error>?
     private var rssiContinuation: CheckedContinuation<Int, Error>?
-
     private var connectContinuation: CheckedContinuation<Void, Error>?
 
-    let events: PassthroughSubject<BluetoothEvent, Never> = PassthroughSubject<BluetoothEvent, Never>()
+    let notifications = PassthroughSubject<BluetoothNotification, Never>()
+    let errors = PassthroughSubject<Error, Never>()
+    let state = PassthroughSubject<BluetoothState, Never>()
 
     let identifier: UUID
     let reconnectInterval: TimeInterval
@@ -61,21 +65,21 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
             if let peripheral = self.central?.retrievePeripherals(withIdentifiers: [self.identifier]).first {
                 self.connectPeripheral(peripheral, afterDelay: .zero)
             } else {
-                self.events.send(.error(BluetoothError.peripheralNotFound))
+                self.errors.send(BluetoothError.peripheralNotFound)
                 self.connectContinuation?.resume(throwing: BluetoothError.peripheralNotFound)
             }
 
         case .poweredOff:
             self.disconnectPeripheral()
-            self.events.send(.error(BluetoothError.poweredOff))
+            self.errors.send(BluetoothError.poweredOff)
             self.connectContinuation?.resume(throwing: BluetoothError.poweredOff)
 
         case .unauthorized:
-            self.events.send(.error(BluetoothError.unauthorized))
+            self.errors.send(BluetoothError.unauthorized)
             self.connectContinuation?.resume(throwing: BluetoothError.unauthorized)
 
         case .unsupported:
-            self.events.send(.error(BluetoothError.unsupported))
+            self.errors.send(BluetoothError.unsupported)
             self.connectContinuation?.resume(throwing: BluetoothError.unsupported)
 
         default:
@@ -85,7 +89,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
 
     internal func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         if let error = error {
-            self.events.send(.error(error))
+            self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
         }
@@ -95,7 +99,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
 
     internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         if let error = error {
-            self.events.send(.error(error))
+            self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
         }
@@ -115,7 +119,6 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         self.readContinuation = nil
         self.writeContinuation?.resume(throwing: BluetoothError.disconnected)
         self.writeContinuation = nil
-        self.notifyCallbacks = [:]
         self.semaphore = DispatchSemaphore(value: 1)
 
         if delay != .infinity {
@@ -136,15 +139,14 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         self.readContinuation = nil
         self.writeContinuation?.resume(throwing: BluetoothError.disconnected)
         self.writeContinuation = nil
-        self.notifyCallbacks = [:]
         self.semaphore.signal()
 
-        self.events.send(.disconnected)
+        self.state.send(.disconnected)
     }
 
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let error = error {
-            self.events.send(.error(error))
+            self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
             return
@@ -157,7 +159,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
 
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error = error {
-            self.events.send(.error(error))
+            self.errors.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
             return
@@ -169,7 +171,7 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
 
         let discoveredServicesCount = Set(self.characteristics.values.compactMap { $0.service?.uuid }).count
         if discoveredServicesCount == (peripheral.services?.count ?? 0) {
-            self.events.send(.connected)
+            self.state.send(.connected)
             self.connectContinuation?.resume()
             self.connectContinuation = nil
         }
@@ -192,11 +194,9 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
     internal func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if characteristic.isNotifying {
             if let error = error {
-                self.events.send(.error(error))
-            } else if let callback = self.notifyCallbacks[characteristic.uuid] {
-                DispatchQueue.main.async {
-                    callback(characteristic.value)
-                }
+                self.errors.send(error)
+            } else {
+                self.notifications.send(BluetoothNotification(uuid: characteristic.uuid, data: characteristic.value))
             }
         } else {
             let continuation = self.readContinuation
@@ -236,14 +236,9 @@ internal class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeriph
         }
     }
 
-    func setNotifyValue(enabled: Bool, for uuid: CBUUID, callback: @escaping ((Data?) -> Void)) {
+    func setNotifyValue(enabled: Bool, for uuid: CBUUID) {
         guard let peripheral = self.peripheral, let characteristic = self.characteristics[uuid] else {
             return
-        }
-        if enabled {
-            self.notifyCallbacks[uuid] = callback
-        } else {
-            self.notifyCallbacks.removeValue(forKey: uuid)
         }
         peripheral.setNotifyValue(enabled, for: characteristic)
     }

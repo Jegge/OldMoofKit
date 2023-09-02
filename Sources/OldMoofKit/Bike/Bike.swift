@@ -41,7 +41,10 @@ public final class Bike: Codable {
     private var key: Data
     private var profile: Profile
     private var connection: BluetoothConnection?
-    private var bluetoothEvents: AnyCancellable?
+    private var state: AnyCancellable?
+    private var errors: AnyCancellable?
+    private var notifications: AnyCancellable?
+    private var notificationCallbacks: [CBUUID: ((Data?) -> Void)] = [:]
 
     public var isConnected: Bool {
         return self.connection?.isConnected ?? false
@@ -205,7 +208,8 @@ public final class Bike: Codable {
         guard let connection = self.connection else {
             throw BikeError.notConnected
         }
-        connection.setNotifyValue(enabled: true, for: request.uuid) { data in
+
+        self.notificationCallbacks[request.uuid] = { data in
             var data = data
             do {
                 if request.decrypt {
@@ -218,6 +222,8 @@ public final class Bike: Codable {
                 self.errorPublisher.send(error)
             }
         }
+
+        connection.setNotifyValue(enabled: true, for: request.uuid)
     }
 
     private func setupConnection () async throws {
@@ -401,8 +407,9 @@ public final class Bike: Codable {
         }
 
         self.connection = BluetoothConnection(identifier: self.identifier, reconnectInterval: 1)
-        self.bluetoothEvents = self.connection?.events.sink { event in
-            switch event {
+
+        self.state = self.connection?.state.sink { state in
+            switch state {
             case .connected:
                 Task {
                     do {
@@ -414,11 +421,17 @@ public final class Bike: Codable {
                 }
 
             case .disconnected:
+                self.notificationCallbacks = [:]
                 self.connectionStatePublisher.send(.disconnected)
-
-            case .error(let error):
-                self.errorPublisher.send(error)
             }
+        }
+
+        self.errors = self.connection?.errors.sink { error in
+            self.errorPublisher.send(error)
+        }
+
+        self.notifications = self.connection?.notifications.sink { notification in
+            self.notificationCallbacks[notification.uuid]?(notification.data)
         }
 
         try await connection?.connect()
@@ -427,7 +440,11 @@ public final class Bike: Codable {
     public func disconnect () {
         self.connection?.disconnectPeripheral()
         self.connection = nil
-        self.bluetoothEvents?.cancel()
-        self.bluetoothEvents = nil
+        self.state?.cancel()
+        self.errors?.cancel()
+        self.notifications?.cancel()
+        self.state = nil
+        self.errors = nil
+        self.notifications = nil
     }
 }
