@@ -161,7 +161,7 @@ public final class Bike: Codable {
         guard let request = request else {
             return nil
         }
-        guard let connection = self.connection else {
+        guard let connection = self.connection, self.state == .connected else {
             throw BikeError.notConnected
         }
 
@@ -177,7 +177,7 @@ public final class Bike: Codable {
         guard let request = request else {
             return
         }
-        guard let connection = self.connection else {
+        guard let connection = self.connection, self.state == .connected else {
             throw BikeError.notConnected
         }
 
@@ -200,7 +200,7 @@ public final class Bike: Codable {
         guard let request = request else {
             return
         }
-        guard let connection = self.connection else {
+        guard let connection = self.connection, self.state == .connected else {
             throw BikeError.notConnected
         }
 
