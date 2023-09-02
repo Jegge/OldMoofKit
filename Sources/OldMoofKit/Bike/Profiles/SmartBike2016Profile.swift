@@ -1,5 +1,5 @@
 //
-//  Electrified2017Profile.swift
+//  SmartBike2017.swift
 //  VanMoofKey
 //
 //  Created by Sebastian Boettcher on 28.08.23.
@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-struct Electified2017Profile: Profile {
+struct SmartBike2016Profile: BikeProfile {
     struct Service {
 //        struct DeviceInformation {
 //            static let identifier = CBUUID(string: "0000180a-0000-1000-8000-00805f9b34fb")
@@ -46,14 +46,14 @@ struct Electified2017Profile: Profile {
 //        static let showFirmware: UInt8 = 8 ????
 //        static let resetDistance: UInt8 = 9 !!
 //        static let enableErrors: UInt8 = 0xa ????
-//        static let disableErrors: UInt8 = 0xb
+//        static let disableErrors: UInt8 = 0xb ????
 //        static let setOffroadMode: UInt8 = 0xc
 //        static let firmwareUpdate: UInt8 = 0xd
     }
 
-    let model: String = "Electrified S/X"
+    let model: String = "SmartBike"
     let identifier: CBUUID = Service.Bike.identifier
-    let hardware: Hardware = [ .motor, .elock, .speaker ]
+    let hardware: BikeHardware = [ .elock ]
 
     func createChallengeReadRequest() -> ReadRequest<Data> {
         return ReadRequest(uuid: Service.Bike.challenge, decrypt: false) {
@@ -73,10 +73,8 @@ struct Electified2017Profile: Profile {
             let moduleState: ModuleState = data[2] == 1 ? .on : .standby
             let isLocked: Lock = data[3] == 1 ? .locked : .unlocked
             let speed: Int = Int(data[4])
-            let motorBatteryLevel: Int = Int(data[5])
             let moduleBatteryLevel: Int = Int(data[6])
             let lighting: Lighting = Lighting(rawValue: data[7]) ?? .off
-            let motorAssistance: MotorAssistance = MotorAssistance(rawValue: data[8]) ?? .off
             let region: Region = Region(rawValue: data[9]) ?? .offroad
             let unit: Unit = Unit(rawValue: data[10]) ?? .metric
             let distance: Double = Double(Data(data[11...14]).uint32) / 10.0
@@ -89,11 +87,11 @@ struct Electified2017Profile: Profile {
                               lock: isLocked,
                               batteryState: isCharging,
                               speed: speed,
-                              motorBatteryLevel: motorBatteryLevel,
+                              motorBatteryLevel: nil,
                               moduleBatteryLevel: moduleBatteryLevel,
                               lighting: lighting,
                               unit: unit,
-                              motorAssistance: motorAssistance,
+                              motorAssistance: nil,
                               region: region,
                               mutedSounds: .none,
                               distance: distance,
@@ -106,9 +104,6 @@ struct Electified2017Profile: Profile {
     }
     func createLightingWriteRequest (value: Lighting) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setLightning, data: Data([value.rawValue]))
-    }
-    func createMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest? {
-        return WriteRequest(uuid: Service.Bike.functions, command: Command.setMotorAssistance, data: Data([value.rawValue, region.rawValue]))
     }
     func createModuleStateWriteRequest (value: ModuleState) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setModuleState, data: Data([value.rawValue]))

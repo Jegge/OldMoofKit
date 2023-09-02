@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-struct SmartBike2018Profile: Profile {
+struct SmartBike2018Profile: BikeProfile {
     struct Service {
         struct Default {
             static let identifier = CBUUID(string: "1800")
@@ -57,7 +57,7 @@ struct SmartBike2018Profile: Profile {
 
     let model: String = "SmartS/X"
     let identifier: CBUUID = CBUUID(string: "F0005500-0451-4000-B000-000000000000")
-    let hardware: Hardware = [ .alarm, .speaker ]
+    let hardware: BikeHardware = [ .alarm, .speaker ]
 
     func createChallengeReadRequest() -> ReadRequest<Data> {
         return ReadRequest(uuid: Service.Security.challenge, decrypt: false) {

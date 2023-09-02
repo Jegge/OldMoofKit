@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-struct Electified2018Profile: Profile {
+struct Electified2018Profile: BikeProfile {
     struct Service {
 //        struct DeviceInformation {
 //            static let identifier = CBUUID(string: "0000180a-0000-1000-8000-00805f9b34fb")
@@ -54,7 +54,7 @@ struct Electified2018Profile: Profile {
 
     let model: String = "S/X2"
     let identifier: CBUUID = Service.Bike.identifier
-    let hardware: Hardware = [ .motor, .elock, .speaker ]
+    let hardware: BikeHardware = [ .motor, .elock, .speaker ]
 
     func createChallengeReadRequest() -> ReadRequest<Data> {
         return ReadRequest(uuid: Service.Bike.challenge, decrypt: false) {

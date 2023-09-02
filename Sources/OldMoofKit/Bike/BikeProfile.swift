@@ -1,9 +1,9 @@
 import CoreBluetooth
 
-protocol Profile {
+protocol BikeProfile {
     var model: String { get }
     var identifier: CBUUID { get }
-    var hardware: Hardware { get }
+    var hardware: BikeHardware { get }
 
     func createChallengeReadRequest () -> ReadRequest<Data>
     func createAuthenticationWriteRequest (key: Data) -> WriteRequest
@@ -31,7 +31,7 @@ protocol Profile {
     func createUnitWriteRequest (value: Unit) -> WriteRequest?
 }
 
-extension Profile {
+extension BikeProfile {
     func createLockReadRequest () -> ReadRequest<Lock>? {
         return nil
     }

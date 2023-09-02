@@ -34,7 +34,7 @@ public final class Bike: Codable {
     public let unitPublisher = PassthroughSubject<Unit, Never>()
 
     private var key: Data
-    private var profile: Profile
+    private var profile: BikeProfile
     private var connection: BluetoothConnection?
     private var bluetoothState: AnyCancellable?
     private var bluetoothErrors: AnyCancellable?
@@ -125,7 +125,7 @@ public final class Bike: Codable {
         }
     }
 
-    private init (identifier: UUID, details: BikeDetails, profile: Profile) {
+    private init (identifier: UUID, details: BikeDetails, profile: BikeProfile) {
         self.identifier = identifier
         self.details = details
         self.profile = profile

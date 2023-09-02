@@ -13,7 +13,7 @@ struct Profiles {
 }
 
 extension BikeDetails {
-    internal var profile: Profile? {
+    internal var profile: BikeProfile? {
         switch bleProfile {
         case "SMARTBIKE_2016": return Profiles.smartBike2016            // SmartBike
         case "SMARTBIKE_2018": return Profiles.smartBike2018            // Smart S/X
@@ -34,7 +34,7 @@ extension BikeDetails {
         return self.profile != nil
     }
 
-    public var hardware: Hardware {
+    public var hardware: BikeHardware {
         return self.profile?.hardware ?? []
     }
 
