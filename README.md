@@ -41,9 +41,9 @@ As the VanMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/doc
 <string>Establishing a bluetooth connection to your VanMoof Bike.</string>
 ```
 
-## Connection
+## How to get a bike
 
-### Vanmoof API
+### From VanMoof web api
 
 To initially get a bike, connect to the VanMoof webapi and retrieve the first bike
 
