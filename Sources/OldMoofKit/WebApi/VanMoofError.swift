@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum VanMoofError: Error {
+public enum VanMoofError: Error {
     case invalidData
     case expected(element: String)
     case invalidStatusCode(_ code: Int)
