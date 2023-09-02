@@ -40,11 +40,13 @@ bike.connect()
 
 ## Supported bikes
 
- [x] SmartBike (untested)
- [x] SmartS / SmartX (tested)
- [x] Electrified S/X (untested)
- [x] S/X 2 (tested)
- [ ] S/X 3 - use [`VanMoofKit`] instead
+Model           | Supported          | Tested              | Alternatives
+:-------------- | :----------------: | :-----------------: | :-------------
+SmartBike       | :white_check_mark: |  :x:                | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+SmartS/X        | :white_check_mark: |  :white_check_mark: | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+Electrified S/X | :white_check_mark: |  :x:                | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+S/X 2           | :white_check_mark: |  :white_check_mark: | [VanBike Library](https://github.com/Poket-Jony/vanbike-lib/tree/main)
+S/X 3           |  :x:               |  :x:                | [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit), [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
 
 ## Info.plist
