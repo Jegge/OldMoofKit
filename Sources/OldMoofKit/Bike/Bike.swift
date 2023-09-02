@@ -8,35 +8,35 @@
 import CoreBluetooth
 import Combine
 
-public enum BikeEvent {
-    case connected
-    case disconnected
-    case error(_ error: Error)
-    case changedAlarm(_ alarm: Alarm)
-    case changedLock(_ lock: Lock)
-    case changedLighting(_ lighting: Lighting)
-    case changedBatteryLevel(_ level: Int)
-    case changedBatteryState(_ state: BatteryState)
-    case changedModuleState(_ state: ModuleState)
-    case changedErrorCode(_ code: ErrorCode)
-    case changedMotorAssistance(_ assistance: MotorAssistance)
-    case changedMutedSounds(_ mutedSounds: MutedSounds)
-    case changedSpeed(_ speed: Int)
-    case changedDistance(_ distance: Double)
-    case changedRegion(_ region: Region)
-    case changedUnit(_ unit: Unit)
-}
-
 public final class Bike: Codable {
     enum CodingKeys: String, CodingKey {
         case identifier
         case details
     }
 
+    public enum ConnectionState {
+        case connected
+        case disconnected
+    }
+
     public let identifier: UUID
     public let details: BikeDetails
 
-    public let events: PassthroughSubject<BikeEvent, Never> = PassthroughSubject<BikeEvent, Never>()
+    public let connectionStatePublisher = PassthroughSubject<Bike.ConnectionState, Never>()
+    public let errorPublisher = PassthroughSubject<Error, Never>()
+    public let lockPublisher = PassthroughSubject<Lock, Never>()
+    public let alarmPublisher = PassthroughSubject<Alarm, Never>()
+    public let lightingPublisher = PassthroughSubject<Lighting, Never>()
+    public let batteryLevelPublisher = PassthroughSubject<Int, Never>()
+    public let batteryStatePublisher = PassthroughSubject<BatteryState, Never>()
+    public let moduleStatePublisher = PassthroughSubject<ModuleState, Never>()
+    public let errorCodePublisher = PassthroughSubject<ErrorCode, Never>()
+    public let motorAssistancePublisher = PassthroughSubject<MotorAssistance, Never>()
+    public let mutedSoundsPublisher = PassthroughSubject<MutedSounds, Never>()
+    public let speedPublisher = PassthroughSubject<Int, Never>()
+    public let distancePublisher = PassthroughSubject<Double, Never>()
+    public let regionPublisher = PassthroughSubject<Region, Never>()
+    public let unitPublisher = PassthroughSubject<Unit, Never>()
 
     private var key: Data
     private var profile: Profile
@@ -47,76 +47,82 @@ public final class Bike: Codable {
         return self.connection?.isConnected ?? false
     }
 
+    public var signalStrength: Int {
+        get async {
+            return (try? await self.connection?.readRssi()) ?? -1
+        }
+    }
+
     private (set) public var lock: Lock = .locked {
         didSet {
-            self.events.send(.changedLock(self.lock))
+            self.lockPublisher.send(self.lock)
         }
     }
     private (set) public var alarm: Alarm? {
         didSet {
             if let alarm = self.alarm {
-                self.events.send(.changedAlarm(alarm))
+                self.alarmPublisher.send(alarm)
             }
         }
     }
     private (set) public var lighting: Lighting = .off {
         didSet {
-            self.events.send(.changedLighting(self.lighting))
+            self.lightingPublisher.send(self.lighting)
         }
     }
     private (set) public var batteryLevel: Int = 0 {
         didSet {
-            self.events.send(.changedBatteryLevel(self.batteryLevel))
+            self.batteryLevelPublisher.send(self.batteryLevel)
         }
     }
     private (set) public var batteryState: BatteryState = .discharging {
         didSet {
-            self.events.send(.changedBatteryState(self.batteryState))
+            self.batteryStatePublisher.send(self.batteryState)
         }
     }
     private (set) public var moduleState: ModuleState = .off {
         didSet {
-            self.events.send(.changedModuleState(self.moduleState))
+            self.moduleStatePublisher.send(self.moduleState)
         }
     }
     private (set) public var errorCode: ErrorCode = ErrorCode() {
         didSet {
-            self.events.send(.changedErrorCode(self.errorCode))
+            self.errorCodePublisher.send(self.errorCode)
         }
     }
     private (set) public var motorAssistance: MotorAssistance? {
         didSet {
             if let motorAssistance = self.motorAssistance {
-                self.events.send(.changedMotorAssistance(motorAssistance))
+                self.motorAssistancePublisher.send(motorAssistance)
             }
         }
     }
     private (set) public var mutedSounds: MutedSounds = [] {
         didSet {
-            self.events.send(.changedMutedSounds(self.mutedSounds))
+            self.mutedSoundsPublisher.send(self.mutedSounds)
         }
     }
     private (set) public var speed: Int = 0 {
         didSet {
-            self.events.send(.changedSpeed(self.speed))
+            self.speedPublisher.send(self.speed)
         }
     }
     private (set) public var distance: Double = 0 {
         didSet {
-            self.events.send(.changedDistance(self.distance))
+            self.distancePublisher.send(self.distance)
         }
     }
     private (set) public var region: Region? {
         didSet {
             if let region = self.region {
-                self.events.send(.changedRegion(region))
+                self.regionPublisher.send(region)
             }
         }
     }
     private (set) public var unit: Unit? {
         didSet {
             if let unit = self.unit {
-                self.events.send(.changedUnit(unit))
+                self.unitPublisher.send(unit)
             }
         }
     }
@@ -209,7 +215,7 @@ public final class Bike: Codable {
                     callback(payload)
                 }
             } catch {
-                self.events.send(.error(error))
+                self.errorPublisher.send(error)
             }
         }
     }
@@ -401,17 +407,17 @@ public final class Bike: Codable {
                 Task {
                     do {
                         try await self.setupConnection()
-                        self.events.send(.connected)
+                        self.connectionStatePublisher.send(.connected)
                     } catch {
-                        self.events.send(.error(error))
+                        self.errorPublisher.send(error)
                     }
                 }
 
             case .disconnected:
-                self.events.send(.disconnected)
+                self.connectionStatePublisher.send(.disconnected)
 
             case .error(let error):
-                self.events.send(.error(error))
+                self.errorPublisher.send(error)
             }
         }
 
