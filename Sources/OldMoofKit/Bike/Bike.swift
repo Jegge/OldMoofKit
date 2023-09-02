@@ -7,6 +7,7 @@
 
 import CoreBluetooth
 import Combine
+import OSLog
 
 public final class Bike: Codable {
     enum CodingKeys: String, CodingKey {
@@ -222,12 +223,12 @@ public final class Bike: Codable {
     }
 
     private func setupConnection () async throws {
-        print("Authenticating...")
+        Logger.bike.trace("Authenticating...")
         try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.key))
 
-        print("Reading parameters...")
+        Logger.bike.trace("Reading parameters...")
         if let parameters = try await self.readRequest(self.profile.createParametersReadRequest()) {
-            print("Parameters:\n\(parameters.description)")
+            Logger.bike.trace("Parameters:\n\(parameters.description)")
             self.batteryLevel = parameters.motorBatteryLevel ?? parameters.moduleBatteryLevel
             self.lock = parameters.lock
             self.alarm = parameters.alarm
@@ -242,11 +243,11 @@ public final class Bike: Codable {
             self.batteryState = parameters.batteryState
         }
         if let moduleBatteryLevel = try await self.readRequest(self.profile.createBatteryLevelReadRequest()) {
-             print("Module battery level: \(moduleBatteryLevel)%")
+            Logger.bike.trace("Module battery level: \(moduleBatteryLevel)%")
             self.batteryLevel = moduleBatteryLevel
         }
         if let lock = try await self.readRequest(self.profile.createLockReadRequest()) {
-            print("Lock: \(lock)")
+            Logger.bike.trace("Lock: \(String(describing: lock))")
             self.lock = lock
         }
         if let alarm = try await self.readRequest(self.profile.createAlarmReadRequest()) {
