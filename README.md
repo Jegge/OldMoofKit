@@ -1,6 +1,6 @@
 # OldMoofKit
 
-## A Swift Package to communicate with older VanMoof Bikes - Smartbike, SmartS/X, Electrified S/X, S/X2
+### A Swift Package to communicate with older VanMoof bikes, e.G. SmartBike, SmartS/X, Electrified S/X or S/X2
 
 ```swift
 import OldMoofKit
