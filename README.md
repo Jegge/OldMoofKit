@@ -164,10 +164,24 @@ try await bike.set(lighting: .alwaysOn)
 
 ### Play sounds
 
+```swift
+try await bike.playSound(.bell, 3) // play the bell sound thrice
+```
+
 ### Setting backup code
+
+```swift
+try await bike.set(backupCode: 123) // sets 123 as new backup code
+```
 
 ### Waking the bike
 
+Sometimes the bike may not immediately react to configuration changes, because it's smart module is sleeping.
+To make sure that your command gets executed even after the bike went to sleep, you can wake it up again.
+
+```swift
+try await bike.wakeup()
+```
 
 ## Credits and inspirations
 
