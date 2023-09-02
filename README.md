@@ -9,8 +9,8 @@ let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish") //
 try await bike.connect()
 try await bike.set(lock: .unlocked)
 
-// The bike is now connected. It will stay that way until manually disconnected.
-// Should the connection drop due to a timeout or the like, it will automatically get restored.
+// do something with the bike, e.g. play a sound
+try await bike.playSound(.bell)
 
 bike.disconnect()
 ```
