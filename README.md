@@ -114,6 +114,12 @@ To retrieve the current connection state, query the bike's `state`:
 
 ```swift
 let state = bike.state
+switch state {
+    case .connected:
+        // do something when connection get (re-)established
+    case .disconnected:
+        // do something when connection drops or closes
+}
 ```
 
 You may also subscribe ot the `statePublisher` and be informed when the current state changes.
