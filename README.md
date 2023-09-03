@@ -50,7 +50,7 @@ As the OldMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/doc
 
 ### From VanMoof web api
 
-To initially get a bike, connect to the VanMoof web api and retrieve the first bike
+To initially get a bike, connect to the VanMoof web api and retrieve the first bike.
 
 ```swift
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
@@ -109,7 +109,7 @@ To retrieve the current connection state, query the bike's `state`:
 let state = bike.state
 ```
 
-You may also subscribe ot the `statePublisher' and be informed when the current state changes.
+You may also subscribe ot the `statePublisher` and be informed when the current state changes.
 
 ```swift
 let subscription: AnyCancellable = bike.statePublisher.receive(on: RunLoop.main).sink { state in
@@ -147,15 +147,19 @@ The bike has all kind of properties that represent the current known state of th
 - `lock` (locked, unlocked)
 - `alarm` (on, off, automatic)
 - `lighting` (always on, automatic, off)
-- `battery level` and `battery state` (charging, discharging and percent charged)
-- `module state` (sleeping, off, on)
-- `error code` (raw data, depending on the bike model)
-- `motor assistance` (off, one, two, three, four)
-- `muted sounds` (wake up sound, shutdown sound, lock sound, unlock sound)
+- `batteryLevel` and `batteryState` (percent charged and charging or discharching)
+- `moduleState` (sleeping, off, on)
+- `errorCode` (raw data, depending on the bike model)
+- `motorAssistance` (off, one, two, three, four)
+- `mutedSounds` (wake up sound, shutdown sound, lock sound, unlock sound)
 - `speed` (current speed in km/h)
 - `distance` (distance in km)
 - `region` (eu, us, japan, offroad)
 - `unit` (metric, imperial)
+
+```swift
+let lighting = bike.lighting
+```
 
 > **Note**: if your bike does not support a properity, it's value will be `nil`.
 
@@ -177,6 +181,8 @@ Each property is complemented by a setter:
 ```swift
 try await bike.set(lighting: .alwaysOn)
 ```
+
+> **Note**: setting the region of your e-bike to a value not corresponding to your country may be illegal in some jurisdictions. Use at your own risk.
 
 ## Other functions
 
