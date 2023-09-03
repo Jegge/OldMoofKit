@@ -1,3 +1,5 @@
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FJegge%2FOldMoofKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Jegge/OldMoofKit)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FJegge%2FOldMoofKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Jegge/OldMoofKit)
 ![GitHub](https://img.shields.io/github/license/Jegge/OldMoofKit)
 ![GitHub issues](https://img.shields.io/github/issues/Jegge/OldMoofKit)
 ![Mastodon Follow](https://img.shields.io/mastodon/follow/108202548777940296?domain=https%3A%2F%2Fchaos.social)
