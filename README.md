@@ -17,7 +17,7 @@ bike.disconnect()
 
 ## Disclaimer
 
-> VanMoofKit is not an official library of [VanMoof B.V](https://vanmoof.com). This Swift Package makes certain features of the bike accessible which may be illegal to use in certain jurisdictions. As this library hasn't reached an official stable version some features are not yet available or may not working as expected.
+> OldMoofKit is not an official library of [VanMoof B.V](https://vanmoof.com). This Swift Package hasn't reached an official stable version, so some features may not work as expected. You use this library solely at your own risk.
 
 ## Features
 
@@ -78,7 +78,7 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 
 ### Codable
 
-Bikes implements [`Codable`](https://developer.apple.com/documentation/swift/codable?changes=_4)and thus can be serialized / deserialized should the need arise.
+Bikes implements [`Codable`](https://developer.apple.com/documentation/swift/codable?changes=_4) and thus can be serialized / deserialized should the need arise.
 
 ```swift
 
@@ -97,7 +97,7 @@ Connecting a bike is straight forward, just call the `connect` method.
 try await bike.connect()
 ```
 
-The bike will stay connected (and in fact automatically re-establish a broken connection) as long as you do not manuall disconnect it.
+The bike will stay connected (and in fact automatically re-establish a broken connection) as long as you do not manually disconnect it.
 
 ```swift
 bike.disconnect()
@@ -125,7 +125,7 @@ subscription.cancel()
 
 ## Errors
 
-The bike also sports a dedicated `errorPublisher`, that you can subscripe to to get error messages.
+The bike has a dedicated `errorPublisher`, that you can subscripe to to get error messages.
 
 ```swift
 let subscription: AnyCancellable = bike.errorPublisher.receive(on: RunLoop.main).sink { error in
@@ -149,7 +149,7 @@ The bike has all kind of properties that represent the current known state of th
 - `lighting` (always on, automatic, off)
 - `battery level` and `battery state` (charging, discharging and percent charged)
 - `module state` (sleeping, off, on)
-- `current error code` (raw data, depending on the bike model)
+- `error code` (raw data, depending on the bike model)
 - `motor assistance` (off, one, two, three, four)
 - `muted sounds` (wake up sound, shutdown sound, lock sound, unlock sound)
 - `speed` (current speed in km/h)
