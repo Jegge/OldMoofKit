@@ -1,3 +1,8 @@
+![GitHub](https://img.shields.io/github/license/Jegge/OldMoofKit)
+![GitHub issues](https://img.shields.io/github/issues/Jegge/OldMoofKit)
+![Mastodon Follow](https://img.shields.io/mastodon/follow/108202548777940296?domain=https%3A%2F%2Fchaos.social)
+
+
 # OldMoofKit
 
 ### A Swift Package to communicate with older VanMoof bikes, such as SmartBike, SmartS/X, Electrified S/X or S/X2
