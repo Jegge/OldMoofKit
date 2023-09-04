@@ -43,8 +43,21 @@ Electrified S/X | :white_check_mark: |  :x:                | [vanbike-lib](https
 S/X 2           | :white_check_mark: |  :white_check_mark: | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
 S/X 3           | :x:                |  :x:                | [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit), [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
+## Installation
 
-## Info.plist
+### Swift Package Manager
+
+To integrate using Apple's [Swift Package Manager](https://swift.org/package-manager/), add the following as a dependency to your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/Jegge/OldMoofKit.git", from: "0.0.2")
+]
+```
+
+Or navigate to your Xcode project then select `Swift Packages`, click the “+” icon and search for `OldMoofKit`.
+
+### Info.plist
 
 As the OldMoofKit is using the [`CoreBluetooth`](https://developer.apple.com/documentation/corebluetooth) framework to establish a [BLE](https://wikipedia.org/wiki/Bluetooth_Low_Energy) connection to a bike the [`NSBluetoothAlwaysUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nsbluetoothalwaysusagedescription) key needs to be added to the Info.plist of your application.
 
