@@ -37,15 +37,19 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
     }
 
     func connect () async throws {
-        if self.central == nil {
+        if self.connectContinuation != nil {
+            throw BluetoothError.busy
+        }
+
+        if let central = self.central {
+            try await withCheckedThrowingContinuation { continuation in
+                self.connectContinuation = continuation
+                self.centralManagerDidUpdateState(central)
+            }
+        } else {
             try await withCheckedThrowingContinuation { continuation in
                 self.connectContinuation = continuation
                 self.central = CBCentralManager(delegate: self, queue: self.queue)
-            }
-        } else if self.central?.state == .poweredOn, let peripheral = self.central?.retrievePeripherals(withIdentifiers: [self.identifier]).first {
-            try await withCheckedThrowingContinuation { continuation in
-                self.connectContinuation = continuation
-                self.connectPeripheral(peripheral, afterDelay: .zero)
             }
         }
     }
@@ -58,20 +62,24 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
             } else {
                 self.errors.send(BluetoothError.peripheralNotFound)
                 self.connectContinuation?.resume(throwing: BluetoothError.peripheralNotFound)
+                self.connectContinuation = nil
             }
 
         case .poweredOff:
             self.disconnectPeripheral()
             self.errors.send(BluetoothError.poweredOff)
             self.connectContinuation?.resume(throwing: BluetoothError.poweredOff)
+            self.connectContinuation = nil
 
         case .unauthorized:
             self.errors.send(BluetoothError.unauthorized)
             self.connectContinuation?.resume(throwing: BluetoothError.unauthorized)
+            self.connectContinuation = nil
 
         case .unsupported:
             self.errors.send(BluetoothError.unsupported)
             self.connectContinuation?.resume(throwing: BluetoothError.unsupported)
+            self.connectContinuation = nil
 
         default:
             Logger.bluetooth.warning("Central entered unexpected state: \(String(describing: central.state))")
