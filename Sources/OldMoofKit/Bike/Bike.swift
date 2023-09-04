@@ -433,7 +433,7 @@ public final class Bike: Codable {
             self.notificationCallbacks[notification.uuid]?(notification.data)
         }
 
-        try await connection?.connect()
+        try await self.connection?.connect()
     }
 
     public func disconnect () {
