@@ -76,6 +76,16 @@ To initially get a bike, connect to the VanMoof web api and retrieve the first b
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
 ```
 
+If you own several bikes, you need to download the details separately.
+
+```swift
+var api = VanMoof(apiUrl: VanMoof.Api.url, apiKey: VanMoof.Api.key)
+try await api.authenticate(username: "Johnny Mnemonic", password: "swordfish")
+let allDetails = try await api.bikeDetails()
+let details = // select one element from allDetails
+let bike = try await Bike(scanningForBikeMatchingDetails: details)
+```
+
 ### Manually from details
 
 If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually.
