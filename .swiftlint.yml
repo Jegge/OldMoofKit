@@ -6,19 +6,12 @@ disabled_rules:
 
 identifier_name:
  excluded:
-  - db
-  - fd
   - to
   - id
   - x
   - y
-  - or
   - eu
   - us
-
-excluded:
- - FMDatabaseAdditionsVariadic.swift
- - FMDatabaseVariadic.swift
 
 nesting:
   type_level:
@@ -28,4 +21,3 @@ nesting:
 
 included:
   - Sources
-  - Tests
