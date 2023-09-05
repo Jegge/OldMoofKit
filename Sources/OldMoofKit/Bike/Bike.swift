@@ -9,7 +9,7 @@ import CoreBluetooth
 import Combine
 import OSLog
 
-/// A connectable bike
+/// A connectable bike.
 public final class Bike: Codable {
     enum CodingKeys: String, CodingKey {
         case identifier
@@ -21,41 +21,41 @@ public final class Bike: Codable {
     /// The details of the bike.
     public let details: BikeDetails
 
-    /// Subscribe this publisher to get informed about changes of this bike's ``state``
+    /// Subscribe this publisher to get informed about changes of this bike's ``state``.
     public let statePublisher = PassthroughSubject<BikeState, Never>()
     /// Subscribe this publisher to get informed about errors that may occur.
     /// 
     /// These errors do not stem from the bike, but rather from within this api. 
-    /// To get informed about the bike's error codes, use ``errorCodePublisher``
+    /// To get informed about the bike's error codes, use ``errorCodePublisher``.
     public let errorPublisher = PassthroughSubject<Error, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``lock``
+    /// Subscribe this publisher to get informed about changes of this bike's ``lock``.
     public let lockPublisher = PassthroughSubject<Lock, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``alarm``
+    /// Subscribe this publisher to get informed about changes of this bike's ``alarm``.
     public let alarmPublisher = PassthroughSubject<Alarm, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``lighting``
+    /// Subscribe this publisher to get informed about changes of this bike's ``lighting``.
     public let lightingPublisher = PassthroughSubject<Lighting, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``batteryLevel``
+    /// Subscribe this publisher to get informed about changes of this bike's ``batteryLevel``.
     public let batteryLevelPublisher = PassthroughSubject<Int, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``batteryState``
+    /// Subscribe this publisher to get informed about changes of this bike's ``batteryState``.
     public let batteryStatePublisher = PassthroughSubject<BatteryState, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``moduleState``
+    /// Subscribe this publisher to get informed about changes of this bike's ``moduleState``.
     public let moduleStatePublisher = PassthroughSubject<ModuleState, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``errorCode``
+    /// Subscribe this publisher to get informed about changes of this bike's ``errorCode``.
     ///
     /// This error code stems from the bike. To get informed about errors coming from within this api,
     /// use ``errorPublisher`` instead.
     public let errorCodePublisher = PassthroughSubject<ErrorCode, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``motorAssistance``
+    /// Subscribe this publisher to get informed about changes of this bike's ``motorAssistance``.
     public let motorAssistancePublisher = PassthroughSubject<MotorAssistance, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``mutedSounds``
+    /// Subscribe this publisher to get informed about changes of this bike's ``mutedSounds``.
     public let mutedSoundsPublisher = PassthroughSubject<MutedSounds, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``speed``
+    /// Subscribe this publisher to get informed about changes of this bike's ``speed``.
     public let speedPublisher = PassthroughSubject<Int, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``distance``
+    /// Subscribe this publisher to get informed about changes of this bike's ``distance``.
     public let distancePublisher = PassthroughSubject<Double, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``region``
+    /// Subscribe this publisher to get informed about changes of this bike's ``region``.
     public let regionPublisher = PassthroughSubject<Region, Never>()
-    /// Subscribe this publisher to get informed about changes of this bike's ``unit``
+    /// Subscribe this publisher to get informed about changes of this bike's ``unit``.
     public let unitPublisher = PassthroughSubject<Unit, Never>()
 
     private var key: Data

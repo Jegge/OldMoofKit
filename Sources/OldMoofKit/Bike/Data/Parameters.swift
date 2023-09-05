@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Parameters: CustomStringConvertible {
+struct Parameters: CustomStringConvertible {
     let data: Data?
     let alarm: Alarm?
     let moduleState: ModuleState
@@ -24,7 +24,7 @@ public struct Parameters: CustomStringConvertible {
     let distance: Double
     let errorCode: ErrorCode
 
-    public var description: String {
+    var description: String {
         let motorAssistance = self.motorAssistance == nil ? "-" : "\(self.motorAssistance!)"
         let alarm = self.alarm == nil ? "-" : "\(self.alarm!)"
         let region = self.region == nil ? "-" : "\(self.region!)"

@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Errors throws from the bluetooth connection
+/// Errors thrown from the bluetooth connection
 public enum BluetoothError: Error {
     /// The peripheral with the given id could not be found.
     case peripheralNotFound

@@ -49,29 +49,29 @@ public enum BleProfile: LosslessStringConvertible, Hashable, Codable {
         }
     }
 
-    /// The ble profile of a SmartBike
+    /// The ble profile of a SmartBike.
     case smartBike2016
-    /// The ble profile of a Smart S or Smart X
+    /// The ble profile of a Smart S or Smart X.
     case smartBike2018
-    /// The ble profile of an Electrified S or Electrified X (2016)
+    /// The ble profile of an Electrified S or Electrified X (2016).
     case electrified2016
-    /// The ble profile of an Electrified S or Electrified X (2016 - 2017)
+    /// The ble profile of an Electrified S or Electrified X (2016 - 2017).
     case electrified20162017
-    /// The ble profile of an Electrified S or Electrified X (2017)
+    /// The ble profile of an Electrified S or Electrified X (2017).
     case electrified2017
-    /// The ble profile of an S2 or X2
+    /// The ble profile of an S2 or X2.
     case electrified2018
-    /// The ble profile of an S3 or X3
+    /// The ble profile of an S3 or X3.
     case electrified2020
-    /// The ble profile of an unknown bike
+    /// The ble profile of an unknown bike.
     case electrified2021
-    /// The ble profile of an unknown bike
+    /// The ble profile of an unknown bike.
     case electrified2022
-    /// The ble profile of an unknown bike
+    /// The ble profile of an unknown bike.
     case electrified2023track1a
-    /// The ble profile of an unknown bike
+    /// The ble profile of an unknown bike.
     case electrified2023track1b
-    /// The ble profile of an unknown bike
+    /// The ble profile of an unknown bike.
     case unknownName(_ name: String)
 }
 

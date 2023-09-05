@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// The VanMoof api
+/// The VanMoof web api. Allows to retreive all the ``BikeDetails`` for a user.
 public class VanMoof {
 
     /// Default values regarding the ``VanMoof`` web api.
@@ -33,32 +33,32 @@ public class VanMoof {
         static let smartmoduleCurrentVersion = "smartmoduleCurrentVersion"
     }
 
-    /// The base URL of the VanMoof web api.
+    /// The base URL of the ``VanMoof`` web api.
     let apiUrl: URL
-    /// The api key to use when querying the VanMoof web api.
+    /// The api key to use when querying the ``VanMoof`` web api.
     let apiKey: String
 
     private var token: String = ""
     private var refreshToken: String = ""
 
-    /// Constructs a VanMoof web api with the given URL and key.
+    /// Constructs a ``VanMoof`` web api with the given URL and key.
     ///
-    /// - Parameter apiUrl: The base URL of the VanMoof web api.
-    /// - Parameter apiKey: The api key to use when querying the VanMoof web api.
+    /// - Parameter apiUrl: The base URL of the ``VanMoof`` web api.
+    /// - Parameter apiKey: The api key to use when querying the ``VanMoof`` web api.
     public init(apiUrl: URL, apiKey: String) {
         self.apiUrl = apiUrl
         self.apiKey = apiKey
     }
 
-    /// Authenticates a user with the VanMoof web api
+    /// Authenticates a user with the ``VanMoof`` web api.
     ///
-    /// - Parameter username: Your VanMoof account's username.
-    /// - Parameter password: Your VanMoof account's password. 
+    /// - Parameter username: Your ``VanMoof`` account's username.
+    /// - Parameter password: Your ``VanMoof`` account's password.
     ///
-    /// - Throws: ``VanMoofError/invalidData`` if the deserialized data is no valid JSON.
+    /// - Throws: ``VanMoofError/invalidData`` if the deserialized data is no valid JSON,
     /// - Throws: ``VanMoofError/expected(element:)`` if an expected element could not be found in the JSON.
-    /// - Throws: ``VanMoofError/unauthorized`` if a 401 http status code occurs.
-    /// - Throws: ``VanMoofError/invalidStatusCode(_:)`` if http status code signalling failure occurs.
+    /// - Throws: ``VanMoofError/unauthorized`` if a 401 HTTP status code occurs.
+    /// - Throws: ``VanMoofError/invalidStatusCode(_:)`` if HTTP status code signalling failure occurs.
     public func authenticate (username: String, password: String) async throws {
         self.token = ""
         self.refreshToken = ""
@@ -98,7 +98,7 @@ public class VanMoof {
         self.refreshToken = refreshToken
     }
 
-    /// Retrieves all bike's details from the VanMoof web api.
+    /// Retrieves all bike's details from the ``VanMoof`` web api.
     ///
     /// This version of the call also returns the raw data.
     /// 
@@ -106,8 +106,8 @@ public class VanMoof {
     ///
     /// - Throws: ``VanMoofError/invalidData`` if the deserialized data is no valid JSON.
     /// - Throws: ``VanMoofError/expected(element:)`` if an expected element could not be found in the JSON.
-    /// - Throws: ``VanMoofError/unauthorized`` if a 401 http status code occurs.
-    /// - Throws: ``VanMoofError/invalidStatusCode(_:)`` if http status code signalling failure occurs.
+    /// - Throws: ``VanMoofError/unauthorized`` if a 401 HTTP status code occurs.
+    /// - Throws: ``VanMoofError/invalidStatusCode(_:)`` if HTTP status code signalling failure occurs.
     /// - Throws: ``VanMoofError/notAuthenticated`` if the connection has not been authenticated beforehand.
     public func bikeDetails () async throws -> (Data, [BikeDetails]) {
         if self.token == "" || self.refreshToken == "" {
@@ -150,14 +150,14 @@ public class VanMoof {
         return (detailData, details)
     }
 
-    /// Retrieves all bike's details from the VanMoof web api.
+    /// Retrieves all bike's details from the ``VanMoof`` web api.
     /// 
     /// - Returns: An array of ``BikeDetails``.
     ///
     /// - Throws: ``VanMoofError/invalidData`` if the deserialized data is no valid JSON.
     /// - Throws: ``VanMoofError/expected(element:)`` if an expected element could not be found in the JSON.
-    /// - Throws: ``VanMoofError/unauthorized`` if a 401 http status code occurs.
-    /// - Throws: ``VanMoofError/invalidStatusCode(_:)`` if http status code signalling failure occurs.
+    /// - Throws: ``VanMoofError/unauthorized`` if a 401 HTTP status code occurs.
+    /// - Throws: ``VanMoofError/invalidStatusCode(_:)`` if HTTP status code signalling failure occurs.
     /// - Throws: ``VanMoofError/notAuthenticated`` if the connection has not been authenticated beforehand.
     public func bikeDetails () async throws -> [BikeDetails] {
         let (_, properties) = try await self.bikeDetails()
@@ -218,13 +218,13 @@ extension Array where Element == BikeDetails {
 }
 
 extension Bike {
-    /// Downloads the first available bike details from the VanMoof website, then performs a
+    /// Downloads the first available bike details from the ``VanMoof`` website, then performs a
     /// bluetooth scan for a device matching said details and returns a connectable bike.
     ///
-    /// - Parameter username: Your VanMoof account's username.
-    /// - Parameter password: Your VanMoof account's password.
-    /// - Parameter apiUrl: The base URL of the VanMoof web api. Defaults to the content of ``VanMoof/Api/url``.
-    /// - Parameter apiKey: The api key to use when querying the VanMoof web api. Defaults to the content of ``VanMoof/Api/key``.
+    /// - Parameter username: Your ``VanMoof`` account's username.
+    /// - Parameter password: Your ``VanMoof`` account's password.
+    /// - Parameter apiUrl: The base URL of the ``VanMoof`` web api. Defaults to the content of ``VanMoof/Api/url``.
+    /// - Parameter apiKey: The api key to use when querying the ``VanMoof`` web api. Defaults to the content of ``VanMoof/Api/key``.
     ///
     /// - Returns: A connectable bike.
     ///

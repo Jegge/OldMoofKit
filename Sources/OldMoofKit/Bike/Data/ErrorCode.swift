@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// An error code that got reported from the bike.
 public struct ErrorCode: CustomStringConvertible, Equatable {
 
     let data: Data
@@ -18,6 +19,7 @@ public struct ErrorCode: CustomStringConvertible, Equatable {
     init(code: UInt8) {
         self.data = Data([code])
     }
+
     init(rawData: Data) {
         self.data = rawData
     }
