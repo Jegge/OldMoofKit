@@ -5,8 +5,6 @@
 //  Created by Sebastian Boettcher on 30.08.23.
 //
 
-import Foundation
-
 public enum Lock: UInt8 {
     case unlocked = 0
     case locked = 1

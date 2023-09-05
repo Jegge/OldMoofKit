@@ -6,7 +6,6 @@
 //
 
 public enum ModuleState: UInt8 {
-    // swiftlint:disable:next identifier_name
     case on = 0
     case off = 1
     case shipping = 2
