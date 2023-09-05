@@ -207,7 +207,7 @@ public final class Bike: Codable {
     ///
     /// - Parameters decoder: The decoder to read data from.
     ///
-    /// - Throws: `BikeError.bikeNotSupported` if the requested bike model is not supported.
+    /// - Throws: ``BikeError/bikeNotSupported`` if the requested bike model is not supported.
     public convenience init (from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let identifier = try container.decode(UUID.self, forKey: .identifier)
@@ -225,11 +225,11 @@ public final class Bike: Codable {
     ///
     /// - Returns: A connectable bike.
     ///
-    /// - Throws: `BikeError.bikeNotSupported` if the requested bike model is not supported.
-    /// - Throws: `BluetoothError.timeout` if the bike could not be found via bluetooth in the specified time period.
-    /// - Throws: `BluetoothError.poweredOff` if bluetooth is currently switched off.
-    /// - Throws: `BluetoothError.unauthorized` if the app is not authorized to use bluetooth in the app settings. 
-    /// - Throws: `BluetoothError.unsupported` if your device does not support bluetooth.
+    /// - Throws: ``BikeError/bikeNotSupported`` if the requested bike model is not supported.
+    /// - Throws: ``BluetoothError/timeout`` if the bike could not be found via bluetooth in the specified time period.
+    /// - Throws: ``BluetoothError/poweredOff`` if bluetooth is currently switched off.
+    /// - Throws: ``BluetoothError/unauthorized`` if the app is not authorized to use bluetooth in the app settings.
+    /// - Throws: ``BluetoothError/unsupported`` if your device does not support bluetooth.
     public convenience init (scanningForBikeMatchingDetails details: BikeDetails, timeout seconds: TimeInterval = 30) async throws {
         guard let profile = details.profile else {
             throw BikeError.bikeNotSupported
@@ -432,7 +432,7 @@ public final class Bike: Codable {
     ///
     /// Does nothing if the bike's `moduleState` is not `.standy`.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func wakeup () async throws {
         if self.moduleState == .standby {
             Logger.bike.info("Waking the bike up!")
@@ -451,7 +451,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter lock: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (lock value: Lock) async throws {
         Logger.bike.info("Setting lock to \(String(describing: value))")
         try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
@@ -464,7 +464,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter lighting: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (lighting value: Lighting) async throws {
         Logger.bike.info("Setting lighting to \(String(describing: value))")
         try await self.writeRequest(self.profile.createLightingWriteRequest(value: value))
@@ -477,7 +477,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter alarm: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (alarm value: Alarm) async throws {
         Logger.bike.info("Setting alarm to \(String(describing: value))")
         try await self.writeRequest(self.profile.createAlarmWriteRequest(value: value))
@@ -492,7 +492,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter motorAssistance: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (motorAssistance value: MotorAssistance) async throws {
         Logger.bike.info("Setting motor assistance to \(String(describing: value))")
         if let region = self.region {
@@ -509,7 +509,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter region: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (region value: Region) async throws {
         Logger.bike.info("Setting region to \(String(describing: value))")
         if let motorAssistance = self.motorAssistance {
@@ -524,7 +524,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter unit: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (unit value: Unit) async throws {
         Logger.bike.info("Setting unit to \(String(describing: value))")
         try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
@@ -537,7 +537,7 @@ public final class Bike: Codable {
     ///
     /// - Parameter mutedSounds: The new value to set.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (mutedSounds value: MutedSounds) async throws {
         Logger.bike.info("Setting muted sounds to \(value.description)")
         try await self.writeRequest(self.profile.createMutedSoundsWriteRequest(value: value))
@@ -551,7 +551,7 @@ public final class Bike: Codable {
     /// - Parameter sound: The sound to play. Depending on your bike, this sound may not be heard.
     /// - Parameter cound: How often this sound is played.
     ///
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func playSound (_ sound: Sound, repeat count: UInt8 = 1) async throws {
         Logger.bike.info("Playing sound \(String(describing: sound)) \(count) times.")
         try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
@@ -564,14 +564,14 @@ public final class Bike: Codable {
     ///
     /// - Parameter code: The code to use. The allowed range is 111 up to 999 inclusive, but it may not contain the digit 0.
     ///
-    /// - Throws: `BikeError.codeOutOfRange` if the code is not valid.
-    /// - Throws: `BikeError.notConnected` if the bike currently not connected.
+    /// - Throws: ``BikeError/pinCodeInvalid`` if the code is not valid.
+    /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (backupCode code: Int) async throws {
         if code < 111 || code > 999 {
-            throw BikeError.codeOutOfRange
+            throw BikeError.pinCodeInvalid
         }
         if String(code, radix: 10).contains("0") {
-            throw BikeError.codeOutOfRange
+            throw BikeError.pinCodeInvalid
         }
         Logger.bike.info("Setting backup code to \(code).")
         try await self.writeRequest(self.profile.createBackupCodeWriteRequest(code: code))
@@ -582,13 +582,13 @@ public final class Bike: Codable {
     /// The connection will be held and automatically restored should it drop until ``disconnect()`` got called.
     /// If the connection is already established, this call will have no effect.
     /// 
-    /// - Throws: `BluetoothError.busy` if the bike is currently trying to connect.
-    /// - Throws: `BluetoothError.peripheralNotFound` if the peripheral is unknown. In this case, try to re-initialize
-    ///            the bike again by construction a new one with ``init(scanningForBikeMatchingDetails:timeout:)``
-    /// - Throws: `BluetoothError.timeout` if the bike could not be found via bluetooth in the specified time period.
-    /// - Throws: `BluetoothError.poweredOff` if bluetooth is currently switched off.
-    /// - Throws: `BluetoothError.unauthorized` if the app is not authorized to use bluetooth in the app settings. 
-    /// - Throws: `BluetoothError.unsupported` if your device does not support bluetooth.
+    /// - Throws: ``BluetoothError/busy`` if the bike is currently trying to connect.
+    /// - Throws: ``BluetoothError/peripheralNotFound`` if the peripheral is unknown. In this case, try to re-initialize
+    ///           the bike again by construction a new one with ``init(scanningForBikeMatchingDetails:timeout:)``
+    /// - Throws: ``BluetoothError/timeout`` if the bike could not be found via bluetooth in the specified time period.
+    /// - Throws: ``BluetoothError/poweredOff`` if bluetooth is currently switched off.
+    /// - Throws: ``BluetoothError/unauthorized`` if the app is not authorized to use bluetooth in the app settings.
+    /// - Throws: ``BluetoothError/unsupported`` if your device does not support bluetooth.
     public func connect () async throws {
         if self.connection != nil {
             return

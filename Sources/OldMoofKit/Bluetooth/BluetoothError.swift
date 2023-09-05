@@ -7,14 +7,23 @@
 
 import Foundation
 
-enum BluetoothError: Error {
+/// Errors throws from the bluetooth connection
+public enum BluetoothError: Error {
+    /// The peripheral with the given id could not be found.
     case peripheralNotFound
+    /// A timeout occured while scanning for a particular bike.
     case timeout
+    /// Bluetooth is not enabled for your app.
     case unauthorized
+    /// Bluetooth is not supported by your device.
     case unsupported
+    /// Bluetooth is currently switched off.
     case poweredOff
+    /// The device is currently disconnected.
     case disconnected
+    /// Attempted to read / to write / to receive notifications for a characteristic that does not exist.
     case characteristicNotFound
+    /// The device is currently busy.
     case busy
 }
 
