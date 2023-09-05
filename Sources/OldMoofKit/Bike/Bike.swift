@@ -16,11 +16,8 @@ public final class Bike: Codable {
         case details
     }
 
-    /// The identifier of the bluetooth device.
-    ///
-    /// Used to reestablish a connection to a previously connected device.
+    /// The identifier of the bluetooth device. Used to reestablish a connection to a previously connected device.
     public let identifier: UUID
-
     /// The details of the bike.
     public let details: BikeDetails
 
@@ -98,14 +95,14 @@ public final class Bike: Codable {
             }
         }
     }
-    
+
     /// The current lighting mode of the bike. Can be set with ``set(lighting:)``.
     private (set) public var lighting: Lighting = .off {
         didSet {
             self.lightingPublisher.send(self.lighting)
         }
     }
-    
+
     /// The current battery level of the bike in percent.
     ///
     /// Refers to the motor battery in bikes that do have a motor, otherwise refers to the module battery.
@@ -132,7 +129,7 @@ public final class Bike: Codable {
             self.moduleStatePublisher.send(self.moduleState)
         }
     }
-    
+
     /// The current error code of the bike.
     private (set) public var errorCode: ErrorCode = ErrorCode() {
         didSet {
@@ -459,7 +456,7 @@ public final class Bike: Codable {
         Logger.bike.info("Setting lock to \(String(describing: value))")
         try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
     }
-    
+
     /// Sets the current ``lighting`` mode of the bike.
     ///
     /// This change is directly transmitted to the bike, and ``lighting`` will automatically 
@@ -559,7 +556,7 @@ public final class Bike: Codable {
         Logger.bike.info("Playing sound \(String(describing: sound)) \(count) times.")
         try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
     }
-    
+
     /// Sets the backup code used to unlock your bike without a bluetooth connection.
     ///
     /// If the bike has no speaker, this call will do nothing. As not all bikes support
@@ -582,12 +579,12 @@ public final class Bike: Codable {
 
     /// Connects the bike.
     ///
-    /// The connection will be held and automatically restored should it drop until ``disconnect`` got called.
+    /// The connection will be held and automatically restored should it drop until ``disconnect()`` got called.
     /// If the connection is already established, this call will have no effect.
     /// 
     /// - Throws: `BluetoothError.busy` if the bike is currently trying to connect.
     /// - Throws: `BluetoothError.peripheralNotFound` if the peripheral is unknown. In this case, try to re-initialize
-    ///            the bike again by construction a new one with ``Bike(scanningForBikeMatchingDetails:timeout:)``
+    ///            the bike again by construction a new one with ``init(scanningForBikeMatchingDetails:timeout:)``
     /// - Throws: `BluetoothError.timeout` if the bike could not be found via bluetooth in the specified time period.
     /// - Throws: `BluetoothError.poweredOff` if bluetooth is currently switched off.
     /// - Throws: `BluetoothError.unauthorized` if the app is not authorized to use bluetooth in the app settings. 

@@ -7,12 +7,19 @@
 
 import Foundation
 
+/// Errors throws by the VanMoof web api.
 public enum VanMoofError: Error {
+    /// This deserialized data can not be parsed as valid JSON.
     case invalidData
+    /// The given element was expected in the JSON file, but could not be found.
     case expected(element: String)
+    /// The HTTP request returned an unexpected status code.
     case invalidStatusCode(_ code: Int)
+    /// The HTTP request returned a status code of 401 (forbidden).
     case notAuthenticated
+    /// The api is not authorized.
     case unauthorized
+    /// The api query yielded no supported bikes.
     case noSupportedBikesFound
 }
 
