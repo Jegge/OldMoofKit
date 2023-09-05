@@ -94,7 +94,7 @@ If you already have your bike details, e.g. because you have downloaded them ear
 let details = BikeDetails(
     name: "MyCoolBike",
     frameNumber: "ABC123456",
-    bleProfile: "SMARTBIKE_2018",
+    bleProfile: .smartbike2016,
     modelName: "VM01-145-2G",
     macAddress: "12:34:56:78:9A:BC",
     encryptionKey: "1234567890abcdef",
