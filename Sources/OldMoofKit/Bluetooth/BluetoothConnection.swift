@@ -42,12 +42,12 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         }
 
         if let central = self.central {
-            try await withCheckedThrowingContinuation { continuation in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
                 self.connectContinuation = continuation
                 self.centralManagerDidUpdateState(central)
             }
         } else {
-            try await withCheckedThrowingContinuation { continuation in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
                 self.connectContinuation = continuation
                 self.central = CBCentralManager(delegate: self, queue: self.queue)
             }
@@ -217,7 +217,7 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         guard let characteristic = self.characteristics[uuid] else {
             throw BluetoothError.characteristicNotFound
         }
-        return try await withCheckedThrowingContinuation { continuation in
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
             self.semaphore.wait()
             self.writeContinuation = continuation
             peripheral.writeValue(data, for: characteristic, type: .withResponse)
