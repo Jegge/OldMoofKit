@@ -5,89 +5,89 @@ protocol BikeProfile {
     var identifier: CBUUID { get }
     var hardware: BikeHardware { get }
 
-    func createChallengeReadRequest () -> ReadRequest<Data>
-    func createAuthenticationWriteRequest (key: Data) -> WriteRequest
+    func makeChallengeReadRequest () -> ReadRequest<Data>
+    func makeAuthenticationWriteRequest (key: Data) -> WriteRequest
 
-    func createLockReadRequest () -> ReadRequest<Lock>?
-    func createAlarmReadRequest () -> ReadRequest<Alarm>?
-    func createLightingReadRequest () -> ReadRequest<Lighting>?
-    func createBatteryLevelReadRequest () -> ReadRequest<Int>?
-    func createBatteryStateReadRequest () -> ReadRequest<BatteryState>?
-    func createModuleStateReadRequest () -> ReadRequest<ModuleState>?
-    func createErrorCodeReadRequest () -> ReadRequest<ErrorCode>?
-    func createMuteSoundReadRequest () -> ReadRequest<MutedSounds>?
-    func createSpeedReadRequest () -> ReadRequest<Int>?
-    func createDistanceReadRequest () -> ReadRequest<Double>?
-    func createParametersReadRequest () -> ReadRequest<Parameters>?
+    func makeLockReadRequest () -> ReadRequest<Lock>?
+    func makeAlarmReadRequest () -> ReadRequest<Alarm>?
+    func makeLightingReadRequest () -> ReadRequest<Lighting>?
+    func makeBatteryLevelReadRequest () -> ReadRequest<Int>?
+    func makeBatteryStateReadRequest () -> ReadRequest<BatteryState>?
+    func makeModuleStateReadRequest () -> ReadRequest<ModuleState>?
+    func makeErrorCodeReadRequest () -> ReadRequest<ErrorCode>?
+    func makeMuteSoundReadRequest () -> ReadRequest<MutedSounds>?
+    func makeSpeedReadRequest () -> ReadRequest<Int>?
+    func makeDistanceReadRequest () -> ReadRequest<Double>?
+    func makeParametersReadRequest () -> ReadRequest<Parameters>?
 
-    func createLockWriteRequest (value: Lock) -> WriteRequest?
-    func createAlarmWriteRequest (value: Alarm) -> WriteRequest?
-    func createLightingWriteRequest (value: Lighting) -> WriteRequest?
-    func createMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest?
-    func createMutedSoundsWriteRequest (value: MutedSounds) -> WriteRequest?
-    func createPlaySoundWriteRequest (sound: Sound, repeats: UInt8) -> WriteRequest?
-    func createModuleStateWriteRequest (value: ModuleState) -> WriteRequest?
-    func createBackupCodeWriteRequest (code: Int) -> WriteRequest?
-    func createUnitWriteRequest (value: Unit) -> WriteRequest?
+    func makeLockWriteRequest (value: Lock) -> WriteRequest?
+    func makeAlarmWriteRequest (value: Alarm) -> WriteRequest?
+    func makeLightingWriteRequest (value: Lighting) -> WriteRequest?
+    func makeMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest?
+    func makeMutedSoundsWriteRequest (value: MutedSounds) -> WriteRequest?
+    func makePlaySoundWriteRequest (sound: Sound, repeats: UInt8) -> WriteRequest?
+    func makeModuleStateWriteRequest (value: ModuleState) -> WriteRequest?
+    func makeBackupCodeWriteRequest (code: Int) -> WriteRequest?
+    func makeUnitWriteRequest (value: Unit) -> WriteRequest?
 }
 
 extension BikeProfile {
-    func createLockReadRequest () -> ReadRequest<Lock>? {
+    func makeLockReadRequest () -> ReadRequest<Lock>? {
         return nil
     }
-    func createAlarmReadRequest () -> ReadRequest<Alarm>? {
+    func makeAlarmReadRequest () -> ReadRequest<Alarm>? {
         return nil
     }
-    func createLightingReadRequest () -> ReadRequest<Lighting>? {
+    func makeLightingReadRequest () -> ReadRequest<Lighting>? {
         return nil
     }
-    func createBatteryLevelReadRequest () -> ReadRequest<Int>? {
+    func makeBatteryLevelReadRequest () -> ReadRequest<Int>? {
         return nil
     }
-    func createBatteryStateReadRequest () -> ReadRequest<BatteryState>? {
+    func makeBatteryStateReadRequest () -> ReadRequest<BatteryState>? {
         return nil
     }
-    func createModuleStateReadRequest () -> ReadRequest<ModuleState>? {
+    func makeModuleStateReadRequest () -> ReadRequest<ModuleState>? {
         return nil
     }
-    func createErrorCodeReadRequest () -> ReadRequest<ErrorCode>? {
+    func makeErrorCodeReadRequest () -> ReadRequest<ErrorCode>? {
         return nil
     }
-    func createMuteSoundReadRequest () -> ReadRequest<MutedSounds>? {
+    func makeMuteSoundReadRequest () -> ReadRequest<MutedSounds>? {
         return nil
     }
-    func createSpeedReadRequest () -> ReadRequest<Int>? {
+    func makeSpeedReadRequest () -> ReadRequest<Int>? {
         return nil
     }
-    func createDistanceReadRequest () -> ReadRequest<Double>? {
+    func makeDistanceReadRequest () -> ReadRequest<Double>? {
         return nil
     }
-    func createParametersReadRequest () -> ReadRequest<Parameters>? {
+    func makeParametersReadRequest () -> ReadRequest<Parameters>? {
         return nil
     }
 
-    func createLockWriteRequest (value: Lock) -> WriteRequest? {
+    func makeLockWriteRequest (value: Lock) -> WriteRequest? {
         return nil
     }
-    func createAlarmWriteRequest (value: Alarm) -> WriteRequest? {
+    func makeAlarmWriteRequest (value: Alarm) -> WriteRequest? {
         return nil
     }
-    func createLightingWriteRequest (value: Lighting) -> WriteRequest? {
+    func makeLightingWriteRequest (value: Lighting) -> WriteRequest? {
         return nil
     }
-    func createMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest? {
+    func makeMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest? {
         return nil
     }
-    func createMutedSoundsWriteRequest (value: MutedSounds) -> WriteRequest? {
+    func makeMutedSoundsWriteRequest (value: MutedSounds) -> WriteRequest? {
         return nil
     }
-    func createPlaySoundWriteRequest (sound: Sound, repeats count: UInt8) -> WriteRequest? {
+    func makePlaySoundWriteRequest (sound: Sound, repeats count: UInt8) -> WriteRequest? {
         return nil
     }
-    func createBackupCodeWriteRequest (code: Int) -> WriteRequest? {
+    func makeBackupCodeWriteRequest (code: Int) -> WriteRequest? {
         return nil
     }
-    func createUnitWriteRequest(value: Unit) -> WriteRequest? {
+    func makeUnitWriteRequest(value: Unit) -> WriteRequest? {
         return nil
     }
 }

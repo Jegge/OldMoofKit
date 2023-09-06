@@ -272,7 +272,7 @@ public final class Bike: Codable {
             throw BikeError.notConnected
         }
 
-        let challenge = try await self.readRequest(self.profile.createChallengeReadRequest())
+        let challenge = try await self.readRequest(self.profile.makeChallengeReadRequest())
         guard var data = challenge?[...1] else {
             return
         }
@@ -314,10 +314,10 @@ public final class Bike: Codable {
 
     private func setupConnection () async throws {
         Logger.bike.info("Authenticating...")
-        try await self.writeRequest(self.profile.createAuthenticationWriteRequest(key: self.key))
+        try await self.writeRequest(self.profile.makeAuthenticationWriteRequest(key: self.key))
 
         Logger.bike.info("Reading parameters...")
-        if let parameters = try await self.readRequest(self.profile.createParametersReadRequest()) {
+        if let parameters = try await self.readRequest(self.profile.makeParametersReadRequest()) {
             Logger.bike.trace("Parameters:\n\(parameters.description)")
             self.batteryLevel = parameters.motorBatteryLevel ?? parameters.moduleBatteryLevel
             self.lock = parameters.lock
@@ -332,45 +332,45 @@ public final class Bike: Codable {
             self.unit = parameters.unit
             self.batteryState = parameters.batteryState
         }
-        if let moduleBatteryLevel = try await self.readRequest(self.profile.createBatteryLevelReadRequest()) {
+        if let moduleBatteryLevel = try await self.readRequest(self.profile.makeBatteryLevelReadRequest()) {
             Logger.bike.trace("Module battery level: \(moduleBatteryLevel)%")
             self.batteryLevel = moduleBatteryLevel
         }
-        if let lock = try await self.readRequest(self.profile.createLockReadRequest()) {
+        if let lock = try await self.readRequest(self.profile.makeLockReadRequest()) {
             Logger.bike.trace("Lock: \(String(describing: lock))")
             self.lock = lock
         }
-        if let alarm = try await self.readRequest(self.profile.createAlarmReadRequest()) {
+        if let alarm = try await self.readRequest(self.profile.makeAlarmReadRequest()) {
             Logger.bike.trace("Alarm: \(String(describing: alarm))")
             self.alarm = alarm
         }
-        if let lighting = try await self.readRequest(self.profile.createLightingReadRequest()) {
+        if let lighting = try await self.readRequest(self.profile.makeLightingReadRequest()) {
             Logger.bike.trace("Lighting: \(String(describing: lighting))")
             self.lighting = lighting
         }
-        if let moduleState = try await self.readRequest(self.profile.createModuleStateReadRequest()) {
+        if let moduleState = try await self.readRequest(self.profile.makeModuleStateReadRequest()) {
             Logger.bike.trace("Module state: \(String(describing: moduleState))")
             self.moduleState = moduleState
         }
-        if let mutedSounds = try await self.readRequest(self.profile.createMuteSoundReadRequest()) {
+        if let mutedSounds = try await self.readRequest(self.profile.makeMuteSoundReadRequest()) {
             Logger.bike.trace("Muted sounds: \(mutedSounds.description))")
             self.mutedSounds = mutedSounds
         }
-        if let errorCode = try await self.readRequest(self.profile.createErrorCodeReadRequest()) {
+        if let errorCode = try await self.readRequest(self.profile.makeErrorCodeReadRequest()) {
             Logger.bike.trace("ErrorCode: \(errorCode)")
             self.errorCode = errorCode
         }
-        if let distance = try await self.readRequest(self.profile.createDistanceReadRequest()) {
+        if let distance = try await self.readRequest(self.profile.makeDistanceReadRequest()) {
             Logger.bike.trace("Distance: \(distance) km")
             self.distance = distance
         }
-        if let batteryState = try await self.readRequest(self.profile.createBatteryStateReadRequest()) {
+        if let batteryState = try await self.readRequest(self.profile.makeBatteryStateReadRequest()) {
             Logger.bike.trace("BatteryState: \(String(describing: batteryState))")
             self.batteryState = batteryState
         }
 
         Logger.bike.info("Starting notifications...")
-        try self.notifyRequest(profile.createParametersReadRequest()) { parameters in
+        try self.notifyRequest(profile.makeParametersReadRequest()) { parameters in
             Logger.bike.trace("Notification: parameters:\n\(parameters.description)")
             self.batteryLevel = parameters.motorBatteryLevel ?? parameters.moduleBatteryLevel
             self.lock = parameters.lock
@@ -386,43 +386,43 @@ public final class Bike: Codable {
             self.unit = parameters.unit
             self.batteryState = parameters.batteryState
         }
-        try? self.notifyRequest(profile.createBatteryLevelReadRequest()) { value in
+        try? self.notifyRequest(profile.makeBatteryLevelReadRequest()) { value in
             Logger.bike.trace("Notification: battery level: \(value)%")
             self.batteryLevel = value
         }
-        try self.notifyRequest(profile.createBatteryStateReadRequest()) { value in
+        try self.notifyRequest(profile.makeBatteryStateReadRequest()) { value in
             Logger.bike.trace("Notification: battery charging: \(String(describing: value))")
             self.batteryState = value
         }
-        try self.notifyRequest(profile.createLockReadRequest()) { value in
+        try self.notifyRequest(profile.makeLockReadRequest()) { value in
             Logger.bike.trace("Notification: lock: \(String(describing: value))")
             self.lock = value
         }
-        try self.notifyRequest(profile.createAlarmReadRequest()) { value in
+        try self.notifyRequest(profile.makeAlarmReadRequest()) { value in
             Logger.bike.trace("Notification: alarm: \(String(describing: value))")
             self.alarm = value
         }
-        try self.notifyRequest(profile.createLightingReadRequest()) { value in
+        try self.notifyRequest(profile.makeLightingReadRequest()) { value in
             Logger.bike.trace("Notification: lighting: \(String(describing: value))")
             self.lighting = value
         }
-        try self.notifyRequest(profile.createModuleStateReadRequest()) { value in
+        try self.notifyRequest(profile.makeModuleStateReadRequest()) { value in
             Logger.bike.trace("Notification: module state: \(String(describing: value))")
             self.moduleState = value
         }
-        try self.notifyRequest(profile.createErrorCodeReadRequest()) { value in
+        try self.notifyRequest(profile.makeErrorCodeReadRequest()) { value in
             Logger.bike.trace("Notification: error code: \(value)")
             self.errorCode = value
         }
-        try self.notifyRequest(profile.createSpeedReadRequest()) { value in
+        try self.notifyRequest(profile.makeSpeedReadRequest()) { value in
             Logger.bike.trace("Notification: speed: \(value)")
             self.speed = value
         }
-        try self.notifyRequest(profile.createDistanceReadRequest()) { value in
+        try self.notifyRequest(profile.makeDistanceReadRequest()) { value in
             Logger.bike.trace("Notification: distance: \(value) km")
             self.distance = value
         }
-        try self.notifyRequest(profile.createMuteSoundReadRequest()) { value in
+        try self.notifyRequest(profile.makeMuteSoundReadRequest()) { value in
             Logger.bike.trace("Notification: muted sounds: \(value)")
             self.mutedSounds = value
         }
@@ -436,7 +436,7 @@ public final class Bike: Codable {
     public func wakeup () async throws {
         if self.moduleState == .standby {
             Logger.bike.info("Waking the bike up!")
-            try await self.writeRequest(self.profile.createModuleStateWriteRequest(value: .on))
+            try await self.writeRequest(self.profile.makeModuleStateWriteRequest(value: .on))
             try await Task.sleep(nanoseconds: NSEC_PER_SEC / 2)
         }
     }
@@ -454,7 +454,7 @@ public final class Bike: Codable {
     /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (lock value: Lock) async throws {
         Logger.bike.info("Setting lock to \(String(describing: value))")
-        try await self.writeRequest(self.profile.createLockWriteRequest(value: value))
+        try await self.writeRequest(self.profile.makeLockWriteRequest(value: value))
     }
 
     /// Sets the current ``lighting`` mode of the bike.
@@ -467,7 +467,7 @@ public final class Bike: Codable {
     /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (lighting value: Lighting) async throws {
         Logger.bike.info("Setting lighting to \(String(describing: value))")
-        try await self.writeRequest(self.profile.createLightingWriteRequest(value: value))
+        try await self.writeRequest(self.profile.makeLightingWriteRequest(value: value))
     }
 
     /// Sets the current ``alarm`` mode of the bike.
@@ -480,7 +480,7 @@ public final class Bike: Codable {
     /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (alarm value: Alarm) async throws {
         Logger.bike.info("Setting alarm to \(String(describing: value))")
-        try await self.writeRequest(self.profile.createAlarmWriteRequest(value: value))
+        try await self.writeRequest(self.profile.makeAlarmWriteRequest(value: value))
     }
 
     /// Sets the current ``motorAssistance`` level of the bike.
@@ -496,7 +496,7 @@ public final class Bike: Codable {
     public func set (motorAssistance value: MotorAssistance) async throws {
         Logger.bike.info("Setting motor assistance to \(String(describing: value))")
         if let region = self.region {
-            try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: value, region: region))
+            try await self.writeRequest(self.profile.makeMotorAssistanceWriteRequest(value: value, region: region))
         }
     }
 
@@ -513,7 +513,7 @@ public final class Bike: Codable {
     public func set (region value: Region) async throws {
         Logger.bike.info("Setting region to \(String(describing: value))")
         if let motorAssistance = self.motorAssistance {
-            try await self.writeRequest(self.profile.createMotorAssistanceWriteRequest(value: motorAssistance, region: value))
+            try await self.writeRequest(self.profile.makeMotorAssistanceWriteRequest(value: motorAssistance, region: value))
         }
     }
 
@@ -527,7 +527,7 @@ public final class Bike: Codable {
     /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (unit value: Unit) async throws {
         Logger.bike.info("Setting unit to \(String(describing: value))")
-        try await self.writeRequest(self.profile.createUnitWriteRequest(value: value))
+        try await self.writeRequest(self.profile.makeUnitWriteRequest(value: value))
     }
 
     /// Sets the current ``mutedSounds`` of the bike.
@@ -540,7 +540,7 @@ public final class Bike: Codable {
     /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func set (mutedSounds value: MutedSounds) async throws {
         Logger.bike.info("Setting muted sounds to \(value.description)")
-        try await self.writeRequest(self.profile.createMutedSoundsWriteRequest(value: value))
+        try await self.writeRequest(self.profile.makeMutedSoundsWriteRequest(value: value))
     }
 
     /// Plays a sound a given number of times via the bike's speaker.
@@ -554,7 +554,7 @@ public final class Bike: Codable {
     /// - Throws: ``BikeError/notConnected`` if the bike currently not connected.
     public func playSound (_ sound: Sound, repeat count: UInt8 = 1) async throws {
         Logger.bike.info("Playing sound \(String(describing: sound)) \(count) times.")
-        try await self.writeRequest(self.profile.createPlaySoundWriteRequest(sound: sound, repeats: count))
+        try await self.writeRequest(self.profile.makePlaySoundWriteRequest(sound: sound, repeats: count))
     }
 
     /// Sets the backup code used to unlock your bike without a bluetooth connection.
@@ -574,7 +574,7 @@ public final class Bike: Codable {
             throw BikeError.pinCodeInvalid
         }
         Logger.bike.info("Setting backup code to \(code).")
-        try await self.writeRequest(self.profile.createBackupCodeWriteRequest(code: code))
+        try await self.writeRequest(self.profile.makeBackupCodeWriteRequest(code: code))
     }
 
     /// Connects the bike.

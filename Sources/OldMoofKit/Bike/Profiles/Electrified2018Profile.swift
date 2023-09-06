@@ -56,16 +56,16 @@ struct Electified2018Profile: BikeProfile {
     let identifier: CBUUID = Service.Bike.identifier
     let hardware: BikeHardware = [ .motor, .elock, .speaker ]
 
-    func createChallengeReadRequest() -> ReadRequest<Data> {
+    func makeChallengeReadRequest() -> ReadRequest<Data> {
         return ReadRequest(uuid: Service.Bike.challenge, decrypt: false) {
             return $0
         }
     }
-    func createAuthenticationWriteRequest (key: Data) -> WriteRequest {
+    func makeAuthenticationWriteRequest (key: Data) -> WriteRequest {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setPasscode, data: Data(key[0...11]))
     }
 
-    func createParametersReadRequest () -> ReadRequest<Parameters>? {
+    func makeParametersReadRequest () -> ReadRequest<Parameters>? {
         return ReadRequest(uuid: Service.Bike.parameters, decrypt: true) { data in
             guard let data = data else {
                 return nil
@@ -118,29 +118,29 @@ struct Electified2018Profile: BikeProfile {
         }
     }
 
-    func createLockWriteRequest (value: Lock) -> WriteRequest? {
+    func makeLockWriteRequest (value: Lock) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.requestLock, data: Data([value.rawValue]))
     }
-    func createAlarmWriteRequest (value: Alarm) -> WriteRequest? {
+    func makeAlarmWriteRequest (value: Alarm) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setAlarm, data: Data([value.rawValue]))
     }
-    func createLightingWriteRequest (value: Lighting) -> WriteRequest? {
+    func makeLightingWriteRequest (value: Lighting) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setLightning, data: Data([value.rawValue]))
     }
-    func createMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest? {
+    func makeMotorAssistanceWriteRequest (value: MotorAssistance, region: Region) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setMotorAssistance, data: Data([value.rawValue, region.rawValue]))
     }
-    func createMutedSoundsWriteRequest (value: MutedSounds) -> WriteRequest? {
+    func makeMutedSoundsWriteRequest (value: MutedSounds) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setSound, data: Data([ 0x00, UInt8(value.rawValue >> 6) ]))
     }
-    func createModuleStateWriteRequest (value: ModuleState) -> WriteRequest? {
+    func makeModuleStateWriteRequest (value: ModuleState) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setModuleState, data: Data([value.rawValue]))
     }
-    func createBackupCodeWriteRequest (code: Int) -> WriteRequest? {
+    func makeBackupCodeWriteRequest (code: Int) -> WriteRequest? {
         let data = Data(String(code, radix: 10).map { UInt8($0.wholeNumberValue!) })
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setBackupCode, data: data)
     }
-    func createUnitWriteRequest(value: Unit) -> WriteRequest? {
+    func makeUnitWriteRequest(value: Unit) -> WriteRequest? {
         return WriteRequest(uuid: Service.Bike.functions, command: Command.setUnit, data: Data([value.rawValue]))
     }
 }

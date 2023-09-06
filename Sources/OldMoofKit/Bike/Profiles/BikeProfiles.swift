@@ -5,7 +5,7 @@
 //  Created by Sebastian Boettcher on 27.08.23.
 //
 
-struct Profiles {
+struct BikeProfiles {
     static let smartBike2016 = SmartBike2016Profile()
     static let smartBike2018 = SmartBike2018Profile()
     static let electrified2017 = Electified2017Profile()
@@ -77,12 +77,12 @@ public enum BleProfile: LosslessStringConvertible, Hashable, Codable {
 
 extension BikeDetails {
     static let bleProfileToBikeProfile: [BleProfile: BikeProfile] = [
-        .smartBike2016: Profiles.smartBike2016,
-        .smartBike2018: Profiles.smartBike2018,
-        .electrified2016: Profiles.electrified2017,
-        .electrified20162017: Profiles.electrified2017,
-        .electrified2017: Profiles.electrified2017,
-        .electrified2018: Profiles.electrified2018
+        .smartBike2016: BikeProfiles.smartBike2016,
+        .smartBike2018: BikeProfiles.smartBike2018,
+        .electrified2016: BikeProfiles.electrified2017,
+        .electrified20162017: BikeProfiles.electrified2017,
+        .electrified2017: BikeProfiles.electrified2017,
+        .electrified2018: BikeProfiles.electrified2018
     ]
 
     var profile: BikeProfile? {
