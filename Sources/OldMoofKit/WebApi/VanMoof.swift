@@ -192,7 +192,7 @@ public class VanMoof {
 
             return BikeDetails(name: name,
                                frameNumber: frameNumber,
-                               bleProfile: BleProfile(bleProfile),
+                               bleProfile: BikeProfileName(bleProfile),
                                modelName: modelName,
                                macAddress: macAddress,
                                encryptionKey: encryptionKey,
