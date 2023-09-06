@@ -36,8 +36,8 @@ extension Data {
     }
 
     private func crypt(operation: CCOperation, algorithm: CCAlgorithm, options: CCOptions, key: Data, data: Data) throws -> Data {
-        let (status, result) = key.withUnsafeBytes { (keyUnsafeRawBufferPointer: UnsafeRawBufferPointer) in
-            return data.withUnsafeBytes { (dataUnsafeRawBufferPointer: UnsafeRawBufferPointer) in
+        let (status, result) = key.withUnsafeBytes { keyUnsafeRawBufferPointer in
+            return data.withUnsafeBytes { dataUnsafeRawBufferPointer in
                 let size = data.count + kCCBlockSizeAES128
                 let buffer = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: 1)
                 defer { buffer.deallocate() }
