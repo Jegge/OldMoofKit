@@ -91,7 +91,7 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually.
 
 ```swift
-let details = BikeDetails(bleProfile: .smartbike2016, macAddress: "12:34:56:78:9A:BC", encryptionKey: "00112233445566778899aabbccddeeff")
+let details = try BikeDetails(bleProfile: .smartbike2016, macAddress: "12:34:56:78:9A:BC", encryptionKey: "00112233445566778899aabbccddeeff")
 let bike = try await Bike(scanningForBikeMatchingDetails: details)
 ```
 
