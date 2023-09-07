@@ -190,13 +190,13 @@ public class VanMoof {
 
             let smartModuleVersion = detail[VanMoof.Key.smartmoduleCurrentVersion] as? String
 
-            return BikeDetails(name: name,
-                               frameNumber: frameNumber,
-                               bleProfile: BikeProfileName(bleProfile),
-                               modelName: modelName,
-                               macAddress: macAddress,
-                               encryptionKey: encryptionKey,
-                               smartModuleVersion: smartModuleVersion)
+            return try BikeDetails(bleProfile: BikeProfileName(bleProfile),
+                                   macAddress: macAddress,
+                                   encryptionKey: encryptionKey,
+                                   modelName: modelName,
+                                   name: name,
+                                   frameNumber: frameNumber,
+                                   smartModuleVersion: smartModuleVersion)
         }
     }
 }

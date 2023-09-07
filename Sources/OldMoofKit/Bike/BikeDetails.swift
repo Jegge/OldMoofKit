@@ -20,14 +20,27 @@ let bleProfileToBikeProfile: [BikeProfileName: BikeProfile] = [
 public struct BikeDetails: Codable {
     /// Creates the details for a bike based on it's properties.
     ///
-    /// Parameter name: The name of the bike. This is a flavour text only.
-    /// Parameter frameNumber: The frame number of the bike. This is a flavour text only.
-    /// Parameter bleProfile: The name of the bluetooth low energy profile. This is crucial to connect a bike.
-    /// Parameter modelName: The technical name of the model. This is flavour text only.
-    /// Parameter macAddress: The MAC address of the bike. This is crucial to connect a bike.
-    /// Parameter encryptionKey: The key used to encrypt the communication with the bike. This is crucial to connect a bike.
-    /// Parameter smartModuleVersion: The version of the smart module. This is a flavour text only.
-    public init(name: String, frameNumber: String, bleProfile: BikeProfileName, modelName: String, macAddress: String, encryptionKey: String, smartModuleVersion: String?) {
+    /// The parameters ``bleProfile``, ``macAddress`` and ``encryptionKey`` are crucial for a bluethooth scan or a connection to succeed.
+    /// On the other hand ``name``, ``frameNumber``, ``modelName`` and ``smartModuleVersion`` are flavour text only and may be omitted.
+    ///
+    /// - Parameter bleProfile: The name of the bluetooth low energy profile.
+    /// - Parameter macAddress: The MAC address of the bike.
+    /// - Parameter encryptionKey: The key used to encrypt the communication with the bike.
+    /// - Parameter name: The optional name of the bike.
+    /// - Parameter frameNumber: The optional frame number of the bike.
+    /// - Parameter modelName: The optional technical name of the model.
+    /// - Parameter smartModuleVersion: The optional version of the smart module.
+    ///
+    /// - Throws: ``BikeError/macAddressInvalidFormat`` if the MAC address is not given in MAC-48 format.
+    /// - Throws: ``BikeError/encryptionKeyInvalidFormat``if the encryption key is not given as 32 hexadecimal encoded bytes.
+    public init(bleProfile: BikeProfileName, macAddress: String, encryptionKey: String,
+                modelName: String = "", name: String = "VanMoof", frameNumber: String = "", smartModuleVersion: String? = nil) throws {
+        if !macAddress.isValidMacAddress {
+            throw BikeError.macAddressInvalidFormat
+        }
+        if !encryptionKey.isValidEncryptionKey {
+            throw BikeError.encryptionKeyInvalidFormat
+        }
         self.name = name
         self.frameNumber = frameNumber
         self.bleProfile = bleProfile
@@ -37,18 +50,18 @@ public struct BikeDetails: Codable {
         self.smartModuleVersion = smartModuleVersion
     }
 
+    /// The bluetooth low energy profile of the bike.
+    public let bleProfile: BikeProfileName
+    /// The MAC address of the bike, in MAC-48 format.
+    public let macAddress: String
+    /// The key used to encrypt the communication with the bike.
+    public let encryptionKey: String
     /// The name of the bike (flavour text).
     public let name: String
     /// The frame number of the bike (flavour text).
     public let frameNumber: String
-    /// The bluetooth low energy profile of the bike.
-    public let bleProfile: BikeProfileName
     /// The technical model name of the bike (flavour text).
     public let modelName: String
-    /// The MAC address of the bike.
-    public let macAddress: String
-    /// The key used to encrypt the communication with the bike.
-    public let encryptionKey: String
     /// The smart module version (flavour text).
     public let smartModuleVersion: String?
 

@@ -34,6 +34,10 @@ public enum BikeProfileName: LosslessStringConvertible {
     /// The ble profile of an unknown bike.
     case unknownName(_ name: String)
 
+    /// Constructs a ``BikeProfileName`` from a string
+    ///
+    /// If the profile name is recognized, a dedicated enum case will be returned.
+    /// If the profile name is not recognized, a ``BikeProfileName/unknownName(_:)`` will be returned.
     // swiftlint:disable:next cyclomatic_complexity
     public init (_ rawValue: String) {
         switch rawValue.uppercased() {
