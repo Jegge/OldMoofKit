@@ -15,9 +15,8 @@ import OldMoofKit
 
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish") // queries the vanmoof web api
 try await bike.connect()
-try await bike.set(lock: .unlocked)
 
-// do something with the bike, e.g. play a sound
+try await bike.set(lock: .unlocked)
 try await bike.playSound(.bell)
 
 bike.disconnect()
@@ -92,20 +91,13 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually.
 
 ```swift
-let details = BikeDetails(
-    name: "MyCoolBike",
-    frameNumber: "ABC123456",
-    bleProfile: .smartbike2016,
-    modelName: "VM01-145-2G",
-    macAddress: "12:34:56:78:9A:BC",
-    encryptionKey: "00112233445566778899aabbccddeeff",
-    smartModuleVersion: "1.2.0"
-)
-
+let details = BikeDetails(bleProfile: .smartbike2016, macAddress: "12:34:56:78:9A:BC", encryptionKey: "00112233445566778899aabbccddeeff")
 let bike = try await Bike(scanningForBikeMatchingDetails: details)
 ```
 
 > **Note**: Make sure that you've got the `bleProfile`, the `macAddress` and the `encryptionKey` correct, otherwise the connection will not be established. The other parameters are solely flavour text.
+> **Note**: The MAC address has to be entered in MAC-48 format.
+> **Note**: The encryption key has to be exactely 16 bytes long.
 
 ### Codable
 
