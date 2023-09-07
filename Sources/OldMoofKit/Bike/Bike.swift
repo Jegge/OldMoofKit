@@ -60,7 +60,7 @@ public final class Bike: Codable {
 
     private var key: Data
     private var profile: BikeProfile
-    private var connection: BluetoothConnection?
+    private var connection: BluetoothConnectionProtocol
     private var bluetoothState: AnyCancellable?
     private var bluetoothErrors: AnyCancellable?
     private var bluetoothNotifications: AnyCancellable?
@@ -68,13 +68,13 @@ public final class Bike: Codable {
 
     /// The current state of the bike.
     public var state: BikeState {
-        return (self.connection?.isConnected == true) ? .connected : .disconnected
+        return self.connection.isConnected == true ? .connected : .disconnected
     }
 
     /// The current bluetooth signal strength of the bike.
     public var signalStrength: Int {
         get async {
-            return (try? await self.connection?.readRssi()) ?? -1
+            return (try? await self.connection.readRssi()) ?? -1
         }
     }
 
@@ -196,7 +196,8 @@ public final class Bike: Codable {
         }
     }
 
-    private init (identifier: UUID, details: BikeDetails, profile: BikeProfile) {
+    private init (connection: BluetoothConnectionProtocol, identifier: UUID, details: BikeDetails, profile: BikeProfile) {
+        self.connection = connection
         self.identifier = identifier
         self.details = details
         self.profile = profile
@@ -215,7 +216,8 @@ public final class Bike: Codable {
         guard let profile = details.profile else {
             throw BikeError.bikeNotSupported
         }
-        self.init(identifier: identifier, details: details, profile: profile)
+        let connection = BluetoothConnection(identifier: identifier, reconnectInterval: 1)
+        self.init(connection: connection, identifier: identifier, details: details, profile: profile)
     }
 
     /// Performs a bluetooth scan for a device matching the provided details and returns a connectable bike.
@@ -236,7 +238,8 @@ public final class Bike: Codable {
         }
         let scanner = BluetoothScanner()
         let identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)
-        self.init(identifier: identifier, details: details, profile: profile)
+        let connection = BluetoothConnection(identifier: identifier, reconnectInterval: 1)
+        self.init(connection: connection, identifier: identifier, details: details, profile: profile)
     }
 
     /// Encodes this bike to a given encoder.
@@ -252,7 +255,7 @@ public final class Bike: Codable {
         guard let request = request else {
             return nil
         }
-        guard let connection = self.connection, self.state == .connected else {
+        guard self.state == .connected else {
             throw BikeError.notConnected
         }
 
@@ -268,7 +271,7 @@ public final class Bike: Codable {
         guard let request = request else {
             return
         }
-        guard let connection = self.connection, self.state == .connected else {
+        guard self.state == .connected else {
             throw BikeError.notConnected
         }
 
@@ -291,7 +294,7 @@ public final class Bike: Codable {
         guard let request = request else {
             return
         }
-        guard let connection = self.connection, self.state == .connected else {
+        guard self.state == .connected else {
             throw BikeError.notConnected
         }
 
@@ -590,13 +593,11 @@ public final class Bike: Codable {
     /// - Throws: ``BluetoothError/unauthorized`` if the app is not authorized to use bluetooth in the app settings.
     /// - Throws: ``BluetoothError/unsupported`` if your device does not support bluetooth.
     public func connect () async throws {
-        if self.connection != nil {
+        if self.connection.isConnected {
             return
         }
 
-        self.connection = BluetoothConnection(identifier: self.identifier, reconnectInterval: 1)
-
-        self.bluetoothState = self.connection?.state.sink { state in
+        self.bluetoothState = self.connection.state.sink { state in
             switch state {
             case .connected:
                 Task {
@@ -616,23 +617,22 @@ public final class Bike: Codable {
             }
         }
 
-        self.bluetoothErrors = self.connection?.errors.sink { error in
+        self.bluetoothErrors = self.connection.errors.sink { error in
             self.errorPublisher.send(error)
         }
 
-        self.bluetoothNotifications = self.connection?.notifications.sink { notification in
+        self.bluetoothNotifications = self.connection.notifications.sink { notification in
             self.notificationCallbacks[notification.uuid]?(notification.data)
         }
 
-        try await self.connection?.connect()
+        try await self.connection.connect()
     }
 
     /// Disconnects the bike.
     ///
     /// The connection will shut down and no further automatic re-connection will be attempted.
     public func disconnect () {
-        self.connection?.disconnectPeripheral()
-        self.connection = nil
+        self.connection.disconnect()
         self.bluetoothState?.cancel()
         self.bluetoothErrors?.cancel()
         self.bluetoothNotifications?.cancel()

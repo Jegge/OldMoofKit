@@ -8,7 +8,11 @@
 import CoreBluetooth
 import OSLog
 
-class BluetoothScanner: NSObject, CBCentralManagerDelegate {
+protocol BluetoothScannerProtocol {
+    func scanForPeripherals(withServices services: [CBUUID]?, name: String?, timeout seconds: TimeInterval) async throws -> UUID
+}
+
+class BluetoothScanner: NSObject, BluetoothScannerProtocol, CBCentralManagerDelegate {
     private let queue = DispatchQueue(label: "com.realvirtuality.bluetooth.scanner", qos: .background)
     private var central: CBCentralManager?
     private var timer: Timer?

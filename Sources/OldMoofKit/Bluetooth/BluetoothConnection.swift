@@ -9,7 +9,23 @@ import CoreBluetooth
 import Combine
 import OSLog
 
-class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+protocol BluetoothConnectionProtocol {
+    var notifications: PassthroughSubject<BluetoothNotification, Never> { get }
+    var errors: PassthroughSubject<Error, Never> { get }
+    var state: PassthroughSubject<BluetoothState, Never> { get }
+    var identifier: UUID { get }
+    var reconnectInterval: TimeInterval { get }
+    var isConnected: Bool { get }
+
+    func connect () async throws
+    func disconnect()
+    func writeValue(_ data: Data, for uuid: CBUUID) async throws
+    func readValue (for uuid: CBUUID) async throws -> Data?
+    func setNotifyValue(enabled: Bool, for uuid: CBUUID)
+    func readRssi () async throws -> Int
+}
+
+class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManagerDelegate, CBPeripheralDelegate {
     private let queue = DispatchQueue(label: "com.realvirtuality.bluetooth.connection", qos: .background)
     private var central: CBCentralManager?
     private var peripheral: CBPeripheral!
@@ -66,7 +82,7 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
             }
 
         case .poweredOff:
-            self.disconnectPeripheral()
+            self.disconnect()
             self.errors.send(BluetoothError.poweredOff)
             self.connectContinuation?.resume(throwing: BluetoothError.poweredOff)
             self.connectContinuation = nil
@@ -92,7 +108,7 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
         }
-        self.disconnectPeripheral()
+        self.disconnect()
         self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
     }
 
@@ -102,7 +118,7 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
         }
-        self.disconnectPeripheral()
+        self.disconnect()
         self.connectPeripheral(peripheral, afterDelay: self.reconnectInterval)
     }
 
@@ -127,7 +143,7 @@ class BluetoothConnection: NSObject, CBCentralManagerDelegate, CBPeripheralDeleg
         }
     }
 
-    func disconnectPeripheral() {
+    func disconnect() {
         if let peripheral = self.peripheral, self.central?.state == .poweredOn {
             self.central?.cancelPeripheralConnection(peripheral)
         }
