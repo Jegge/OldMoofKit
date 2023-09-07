@@ -17,7 +17,7 @@ extension String {
     }
 
     func matchesRegex (pattern: String) throws -> Bool {
-        if #available(macOS 13.0, *) {
+        if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
             let regex = try Regex(pattern)
             return !self.ranges(of: regex).isEmpty
         } else {
