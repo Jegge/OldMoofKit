@@ -34,7 +34,7 @@ public struct BikeDetails: Codable {
     /// - Throws: ``BikeError/macAddressInvalidFormat`` if the MAC address is not given in MAC-48 format.
     /// - Throws: ``BikeError/encryptionKeyInvalidFormat``if the encryption key is not given as 32 hexadecimal encoded bytes.
     public init(bleProfile: BikeProfileName, macAddress: String, encryptionKey: String,
-                modelName: String = "", name: String = "VanMoof", frameNumber: String = "", smartModuleVersion: String? = nil) throws {
+                name: String = "VanMoof", frameNumber: String = "", modelName: String = "", smartModuleVersion: String? = nil) throws {
         if !macAddress.isValidMacAddress {
             throw BikeError.macAddressInvalidFormat
         }
