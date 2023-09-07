@@ -83,7 +83,7 @@ If you own several bikes, you need to download the details separately.
 var api = VanMoof(apiUrl: VanMoof.Api.url, apiKey: VanMoof.Api.key)
 try await api.authenticate(username: "Johnny Mnemonic", password: "swordfish")
 let allDetails = try await api.bikeDetails()
-let details = // select one element from allDetails
+let details = allDetails.first! // select one element from allDetails
 let bike = try await Bike(scanningForBikeMatchingDetails: details)
 ```
 
@@ -98,7 +98,7 @@ let details = BikeDetails(
     bleProfile: .smartbike2016,
     modelName: "VM01-145-2G",
     macAddress: "12:34:56:78:9A:BC",
-    encryptionKey: "1234567890abcdef",
+    encryptionKey: "00112233445566778899aabbccddeeff",
     smartModuleVersion: "1.2.0"
 )
 
