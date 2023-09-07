@@ -27,5 +27,9 @@ let package = Package(
             dependencies: []
             //, plugins: [.plugin(name: "SwiftLintPlugin", package: "SwiftLint")]
         ),
+        .testTarget(
+               name: "OldMoofKitTests",
+               dependencies: ["OldMoofKit"]
+        )
     ]
 )
