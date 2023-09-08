@@ -65,12 +65,15 @@ final class TestBike: XCTestCase {
         }
     }
 
-    func testScannedBike() async throws {
+    func testBikeConnection() async throws {
         let bluetooth = SmartBike2018BluetoothConnectionMock()
-        var testsDone = false
         var authenticated = false
+        var connected = false
         var setLight = false
         var setLock = false
+        var setAlarm = false
+        var setModuleState = false
+        var setMutedSounds = false
 
         bluetooth.handleWriteValue = { data, uuid, notifications in
             let payload = Data(try! data.decrypt_aes_ecb_zero(key: Data(hexString: SmartBike2018BluetoothConnectionMock.encryptionKey)!).dropFirst(2))
@@ -88,7 +91,21 @@ final class TestBike: XCTestCase {
                 XCTAssertEqual(Lock(rawValue: payload.first!)!, .unlocked)
                 notifications.send(BluetoothNotification(uuid: uuid, data: Data([Lock.unlocked.rawValue])))
                 setLock = true
-                testsDone = true
+
+            case "6ACB5512-E631-4069-944D-B8CA7598AD50": // set alarm
+                XCTAssertEqual(Alarm(rawValue: payload.first!)!, .manual)
+                notifications.send(BluetoothNotification(uuid: uuid, data: Data([Alarm.manual.rawValue])))
+                setAlarm = true
+
+            case "6ACB5507-E631-4069-944D-B8CA7598AD50": // set module state
+                XCTAssertEqual(ModuleState(rawValue: payload.first!)!, .on)
+                notifications.send(BluetoothNotification(uuid: uuid, data: Data([ModuleState.on.rawValue])))
+                setModuleState = true
+
+            case "6ACB5505-E631-4069-944D-B8CA7598AD50": // set muted sounds
+                XCTAssertEqual(Data(hexString: "0000003300000000000000000000"), payload)
+                notifications.send(BluetoothNotification(uuid: uuid, data: Data([0x00, 0x00, 0x33, 0x00])))
+                setMutedSounds = true 
 
             default:
                 break
@@ -98,11 +115,22 @@ final class TestBike: XCTestCase {
         bluetooth.handleReadValue = { uuid in
             switch uuid.uuidString {
             case "6ACB5522-E631-4069-944D-B8CA7598AD50": // read challenge
-                return Data(hexString: "2342")
+                return Data([0x23, 0x42])
             case "6ACB5511-E631-4069-944D-B8CA7598AD50": // read light
                 return Data([Lighting.off.rawValue])
             case "6ACB5501-E631-4069-944D-B8CA7598AD50":  // read lock
                 return Data([Lock.locked.rawValue])
+            case "6ACB5512-E631-4069-944D-B8CA7598AD50": // read alarm
+                return Data([Alarm.automatic.rawValue])
+            case "6ACB5502-E631-4069-944D-B8CA7598AD50": // read distance
+                return Data([12,34,56,78]) // 131230158.0 km
+            case "6ACB5507-E631-4069-944D-B8CA7598AD50": // read module state
+                return Data([ModuleState.standby.rawValue])
+            case "6ACB5508-E631-4069-944D-B8CA7598AD50": // read error code
+                return Data([0x23, 0x42])
+            case "6ACB5505-E631-4069-944D-B8CA7598AD50": // read muted sounds
+                return Data([0x00, 0x00, 0x00, 0x00])
+
             default:
                 return nil
             }
@@ -121,52 +149,54 @@ final class TestBike: XCTestCase {
 
         let bike = try await Bike(scanner: bluetooth, details: details, profile: details.profile!)
 
+        XCTAssertEqual(bike.details, details)
+
         let bikeErrors = bike.errorPublisher.sink { error in
             XCTFail("Bluetooth error: \(error)")
         }
 
-        XCTAssertEqual(bike.details, details)
+        let bikeState = bike.statePublisher.sink { _ in
+            connected = true
+        }
 
         XCTAssertEqual(bike.state, .disconnected)
         try await bike.connect()
-        await bike.statePublisher.awaitValue(.connected)
+        while !connected { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
         XCTAssertEqual(bike.state, .connected)
         XCTAssertTrue(authenticated)
 
+        XCTAssertEqual(bike.distance, 131230158.0)
+        XCTAssertEqual(bike.moduleState, .standby)
+        XCTAssertEqual(bike.errorCode.data, Data([0x23, 0x42]))
         XCTAssertEqual(bike.lighting, .off)
-        try await bike.set(lighting: .alwaysOn)
-        XCTAssertEqual(bike.lighting, .alwaysOn)
-        XCTAssertTrue(setLight)
-
         XCTAssertEqual(bike.lock, .locked)
-        try await bike.set(lock: .unlocked)
-        XCTAssertEqual(bike.lock, .unlocked)
-        XCTAssertTrue(setLock)
+        XCTAssertEqual(bike.alarm, .automatic)
+        XCTAssertEqual(bike.mutedSounds, .none)
 
-        while !testsDone {
-            try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2)
-        }
+        try await bike.wakeup()
+        while !setModuleState { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
+        XCTAssertEqual(bike.moduleState, .on)
+
+        try await bike.set(lighting: .alwaysOn)
+        while !setLight { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
+        XCTAssertEqual(bike.lighting, .alwaysOn)
+
+        try await bike.set(lock: .unlocked)
+        while !setLock { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
+        XCTAssertEqual(bike.lock, .unlocked)
+
+        try await bike.set(alarm: .manual)
+        while !setAlarm { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
+        XCTAssertEqual(bike.alarm, .manual)
+
+        try await bike.set(mutedSounds: [.lockState, .moduleState])
+        while !setMutedSounds { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
+        XCTAssertEqual(bike.mutedSounds, [.lockState, .moduleState])
 
         bike.disconnect()
         XCTAssertEqual(bike.state, .disconnected)
 
         bluetoothErrors.cancel()
         bikeErrors.cancel()
-    }
-}
-
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher where Self.Failure == Never, Self.Output: Equatable {
-    func awaitValue (_ value: Self.Output) async {
-        var cancellable: AnyCancellable?
-        await withCheckedContinuation { continuation in
-            cancellable = self.sink { received in
-                if received == value {
-                    continuation.resume()
-                }
-            }
-        }
-        cancellable?.cancel()
     }
 }
