@@ -36,7 +36,6 @@ extension BikeError: LocalizedError {
             return NSLocalizedString("The encryption key must be 32 bytes long, as hexadecimal string.", comment: "Error descritpion: encryptionKeyInvalidFormat")
         case .macAddressInvalidFormat:
             return NSLocalizedString("The mac address must be specified in MAC-48 format.", comment: "Error descritpion: macAddressInvalidFormat")
-
         }
     }
 }

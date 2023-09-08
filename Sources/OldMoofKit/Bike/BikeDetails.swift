@@ -17,7 +17,7 @@ let bleProfileToBikeProfile: [BikeProfileName: BikeProfile] = [
 ]
 
 /// The details of a bike, as read from the ``VanMoof`` api.
-public struct BikeDetails: Codable {
+public struct BikeDetails: Codable, Equatable {
     /// Creates the details for a bike based on it's properties.
     ///
     /// The parameters ``bleProfile``, ``macAddress`` and ``encryptionKey`` are crucial for a bluethooth scan or a connection to succeed.

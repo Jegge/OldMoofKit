@@ -196,11 +196,19 @@ public final class Bike: Codable {
         }
     }
 
-    private init (connection: BluetoothConnectionProtocol, identifier: UUID, details: BikeDetails, profile: BikeProfile) {
+    internal init (connection: BluetoothConnectionProtocol, identifier: UUID, details: BikeDetails, profile: BikeProfile) {
         self.connection = connection
         self.identifier = identifier
         self.details = details
         self.profile = profile
+        self.key = Data(hexString: details.encryptionKey) ?? Data()
+    }
+
+    internal init (scanner: BluetoothScannerProtocol, details: BikeDetails, profile: BikeProfile, timeout seconds: TimeInterval = 30) async throws {
+        self.details = details
+        self.profile = profile
+        self.identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)
+        self.connection = scanner.makeConnection(identifier: self.identifier)
         self.key = Data(hexString: details.encryptionKey) ?? Data()
     }
 
@@ -236,10 +244,7 @@ public final class Bike: Codable {
         guard let profile = details.profile else {
             throw BikeError.bikeNotSupported
         }
-        let scanner = BluetoothScanner()
-        let identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)
-        let connection = BluetoothConnection(identifier: identifier, reconnectInterval: 1)
-        self.init(connection: connection, identifier: identifier, details: details, profile: profile)
+        try await self.init(scanner: BluetoothScanner(), details: details, profile: profile)
     }
 
     /// Encodes this bike to a given encoder.
