@@ -66,7 +66,7 @@ public struct BikeDetails: Codable, Equatable {
     public let smartModuleVersion: String?
 
     var deviceName: String {
-        return "VANMOOF-\(macAddress.filter { $0 != ":" }.dropFirst(6))"
+        return "VANMOOF-\(macAddress.filter { $0 != ":" && $0 != "-" }.dropFirst(6))"
     }
 
     var profile: BikeProfile? {
