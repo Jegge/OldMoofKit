@@ -96,7 +96,9 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 ```
 
 > **Note**: Make sure that you've got the `bleProfile`, the `macAddress` and the `encryptionKey` correct, otherwise the connection will not be established. The other parameters are solely flavour text.
+
 > **Note**: The MAC address has to be entered in MAC-48 format.
+
 > **Note**: The encryption key has to be exactely 16 bytes long.
 
 ### Codable
