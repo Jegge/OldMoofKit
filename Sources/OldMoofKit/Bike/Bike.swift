@@ -59,7 +59,7 @@ public final class Bike: Codable {
     public let unitPublisher = PassthroughSubject<Unit, Never>()
 
     private var key: Data
-    private var profile: BikeProfile
+    private var profile: any BikeProfile
     private var connection: BluetoothConnectionProtocol
     private var bluetoothState: AnyCancellable?
     private var bluetoothErrors: AnyCancellable?
@@ -196,7 +196,7 @@ public final class Bike: Codable {
         }
     }
 
-    internal init (connection: BluetoothConnectionProtocol, identifier: UUID, details: BikeDetails, profile: BikeProfile) {
+    internal init (connection: BluetoothConnectionProtocol, identifier: UUID, details: BikeDetails, profile: any BikeProfile) {
         self.connection = connection
         self.identifier = identifier
         self.details = details
@@ -204,7 +204,7 @@ public final class Bike: Codable {
         self.key = Data(hexString: details.encryptionKey) ?? Data()
     }
 
-    internal init (scanner: BluetoothScannerProtocol, details: BikeDetails, profile: BikeProfile, timeout seconds: TimeInterval = 30) async throws {
+    internal init (scanner: BluetoothScannerProtocol, details: BikeDetails, profile: any BikeProfile, timeout seconds: TimeInterval = 30) async throws {
         self.details = details
         self.profile = profile
         self.identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)

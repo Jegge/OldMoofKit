@@ -7,7 +7,7 @@
 
 import Foundation
 
-let bleProfileToBikeProfile: [BikeProfileName: BikeProfile] = [
+let bleProfileToBikeProfile: [BikeProfileName: any BikeProfile] = [
     .smartBike2016: SmartBike2016Profile(),
     .smartBike2018: SmartBike2018Profile(),
     .electrified2016: Electified2017Profile(),
@@ -69,7 +69,7 @@ public struct BikeDetails: Codable, Equatable {
         return "VANMOOF-\(macAddress.filter { $0 != ":" && $0 != "-" }.dropFirst(6))"
     }
 
-    var profile: BikeProfile? {
+    var profile: (any BikeProfile)? {
         return bleProfileToBikeProfile[self.bleProfile]
     }
 
