@@ -30,7 +30,7 @@ final class TestBikeDetails: XCTestCase {
 
         XCTAssertEqual(details.bleProfile, bleProfile)
         XCTAssertEqual(details.macAddress, macAddress)
-        XCTAssertEqual(details.encryptionKey, encryptionKey)
+        XCTAssertEqual(details.encryptionKey.hexString, encryptionKey)
         XCTAssertEqual(details.name, bikeName)
         XCTAssertEqual(details.model, SmartBike2018Profile().model)
         XCTAssertEqual(details.modelName, modelName)
@@ -53,7 +53,7 @@ final class TestBikeDetails: XCTestCase {
 
         XCTAssertEqual(details.bleProfile, .electrified2022)
         XCTAssertEqual(details.macAddress, macAddress)
-        XCTAssertEqual(details.encryptionKey, encryptionKey)
+        XCTAssertEqual(details.encryptionKey.hexString, encryptionKey)
         XCTAssertEqual(details.name, bikeName)
         XCTAssertEqual(details.model, modelName)
         XCTAssertEqual(details.modelName, modelName)

@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import CommonCrypto
 
 extension String {
     var isValidEncryptionKey: Bool {
-        return (try? self.matchesRegex(pattern: "^[0-9A-Fa-f]{32}$")) ?? false
+        return (try? self.matchesRegex(pattern: "^[0-9A-Fa-f]{\(kCCKeySizeAES128 * 2)}$")) ?? false
     }
 
     var isValidMacAddress: Bool {
@@ -27,3 +28,4 @@ extension String {
         }
     }
 }
+

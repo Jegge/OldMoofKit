@@ -15,10 +15,8 @@ import OldMoofKit
 
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish") // queries the vanmoof web api
 try await bike.connect()
-
-try await bike.set(lock: .unlocked)
 try await bike.playSound(.bell)
-
+try await bike.set(lock: .unlocked)
 bike.disconnect()
 ```
 
@@ -99,7 +97,7 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 
 > **Note**: The MAC address has to be entered in MAC-48 format.
 
-> **Note**: The encryption key has to be exactely 16 bytes long.
+> **Note**: The encryption key has to be exactely 16 bytes long and has to be entered as hex string.
 
 ### Codable
 
@@ -208,7 +206,7 @@ subscription.cancel()
 > **Note**: When disconnecting, do not forget to cancel your subscription.
 
 Each property is complemented by a setter. Calling this setter transmits the value directly to the bike. The bike then will send a notification and the
-according property will get updated upon receiving that notification.
+according property will get updated upon receiving that notification. If your bike does not support a property, calling the setter will be ignored.
 
 ```swift
 try await bike.set(lighting: .alwaysOn)
@@ -233,7 +231,9 @@ try await bike.set(backupCode: 123) // sets 123 as new backup code
 ### Waking the bike
 
 Sometimes the bike may not immediately react to configuration changes, because it's smart module is sleeping.
-To make sure that your command gets executed even after the bike went to sleep, you can wake it up again.
+To make sure that your command gets executed even after the bike went to sleep, you can wake it up again. 
+When ``wakeup`` returns, the command has been sent to the bike. It may still be on ``.standby`` at this moment. 
+To be sure that the bike is awake, consider listening the the ``moduleStatePublisher``.
 
 ```swift
 try await bike.wakeup()

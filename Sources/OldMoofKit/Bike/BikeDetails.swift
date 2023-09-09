@@ -35,18 +35,19 @@ public struct BikeDetails: Codable, Equatable {
     /// - Throws: ``BikeError/encryptionKeyInvalidFormat`` if the encryption key is not given as 16 hexadecimal encoded bytes.
     public init(bleProfile: BikeProfileName, macAddress: String, encryptionKey: String,
                 name: String = "VanMoof", frameNumber: String = "", modelName: String = "", smartModuleVersion: String? = nil) throws {
+        guard encryptionKey.isValidEncryptionKey, let key = Data(hexString: encryptionKey) else {
+            throw BikeError.encryptionKeyInvalidFormat
+        }
         if !macAddress.isValidMacAddress {
             throw BikeError.macAddressInvalidFormat
         }
-        if !encryptionKey.isValidEncryptionKey {
-            throw BikeError.encryptionKeyInvalidFormat
-        }
+
         self.name = name
         self.frameNumber = frameNumber
         self.bleProfile = bleProfile
         self.modelName = modelName
         self.macAddress = macAddress
-        self.encryptionKey = encryptionKey
+        self.encryptionKey = key
         self.smartModuleVersion = smartModuleVersion
     }
 
@@ -55,7 +56,7 @@ public struct BikeDetails: Codable, Equatable {
     /// The MAC address of the bike, in MAC-48 format.
     public let macAddress: String
     /// The key used to encrypt the communication with the bike.
-    public let encryptionKey: String
+    public let encryptionKey: Data
     /// The name of the bike (flavour text).
     public let name: String
     /// The frame number of the bike (flavour text).

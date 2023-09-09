@@ -58,7 +58,6 @@ public final class Bike: Codable {
     /// Subscribe this publisher to get informed about changes of this bike's ``unit``.
     public let unitPublisher = PassthroughSubject<Unit, Never>()
 
-    private var key: Data
     private var profile: any BikeProfile
     private var connection: BluetoothConnectionProtocol
     private var bluetoothState: AnyCancellable?
@@ -201,7 +200,6 @@ public final class Bike: Codable {
         self.identifier = identifier
         self.details = details
         self.profile = profile
-        self.key = Data(hexString: details.encryptionKey) ?? Data()
     }
 
     internal init (scanner: BluetoothScannerProtocol, details: BikeDetails, profile: any BikeProfile, timeout seconds: TimeInterval = 30) async throws {
@@ -209,7 +207,6 @@ public final class Bike: Codable {
         self.profile = profile
         self.identifier = try await scanner.scanForPeripherals(withServices: [profile.identifier], name: details.deviceName, timeout: seconds)
         self.connection = scanner.makeConnection(identifier: self.identifier)
-        self.key = Data(hexString: details.encryptionKey) ?? Data()
     }
 
     /// Creates a new bike instance by decoding from the given decoder.
@@ -266,7 +263,7 @@ public final class Bike: Codable {
 
         var data = try await connection.readValue(for: request.uuid)
         if request.decrypt {
-            data = try data?.decrypt_aes_ecb_zero(key: self.key)
+            data = try data?.decrypt_aes_ecb_zero(key: self.details.encryptionKey)
         }
 
         return request.parse(data)
@@ -291,7 +288,7 @@ public final class Bike: Codable {
 
         data += request.data
 
-        let payload = try data.encrypt_aes_ecb_zero(key: self.key)
+        let payload = try data.encrypt_aes_ecb_zero(key: self.details.encryptionKey)
         try await connection.writeValue(payload, for: request.uuid)
     }
 
@@ -307,7 +304,7 @@ public final class Bike: Codable {
             var data = data
             do {
                 if request.decrypt {
-                    data = try data?.decrypt_aes_ecb_zero(key: self.key)
+                    data = try data?.decrypt_aes_ecb_zero(key: self.details.encryptionKey)
                 }
                 if let payload = request.parse(data) {
                     callback(payload)
@@ -322,7 +319,7 @@ public final class Bike: Codable {
 
     private func setupConnection () async throws {
         Logger.bike.info("Authenticating...")
-        try await self.writeRequest(self.profile.makeAuthenticationWriteRequest(key: self.key))
+        try await self.writeRequest(self.profile.makeAuthenticationWriteRequest(key: self.details.encryptionKey))
 
         Logger.bike.info("Reading parameters...")
         if let parameters = try await self.readRequest(self.profile.makeParametersReadRequest()) {
