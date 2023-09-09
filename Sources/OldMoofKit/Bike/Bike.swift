@@ -436,7 +436,7 @@ public final class Bike: Codable {
         }
     }
 
-    private func onChangedConnectionState (_ state: BluetoothState) async  {
+    private func onChangedConnectionState (_ state: BluetoothState) async {
         switch state {
         case .connected:
             do {

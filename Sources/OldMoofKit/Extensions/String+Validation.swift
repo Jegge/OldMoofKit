@@ -9,11 +9,11 @@ import Foundation
 
 extension String {
     var isValidEncryptionKey: Bool {
-        return try! self.matchesRegex(pattern: "^[0-9A-Fa-f]{32}$")
+        return (try? self.matchesRegex(pattern: "^[0-9A-Fa-f]{32}$")) ?? false
     }
 
     var isValidMacAddress: Bool {
-        return try! self.matchesRegex(pattern: "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
+        return (try? self.matchesRegex(pattern: "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")) ?? false
     }
 
     func matchesRegex (pattern: String) throws -> Bool {

@@ -16,7 +16,7 @@ protocol BluetoothConnectionProtocol {
     var identifier: UUID { get }
     var reconnectInterval: TimeInterval { get }
     var state: BluetoothState { get }
-    
+
     func connect () async throws
     func disconnect()
     func writeValue(_ data: Data, for uuid: CBUUID) async throws

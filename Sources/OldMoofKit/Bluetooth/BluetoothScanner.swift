@@ -10,7 +10,7 @@ import OSLog
 
 protocol BluetoothScannerProtocol {
     func scanForPeripherals(withServices services: [CBUUID]?, name: String?, timeout seconds: TimeInterval) async throws -> UUID
-    func makeConnection(identifier: UUID) -> BluetoothConnectionProtocol 
+    func makeConnection(identifier: UUID) -> BluetoothConnectionProtocol
 }
 
 class BluetoothScanner: NSObject, BluetoothScannerProtocol, CBCentralManagerDelegate {
