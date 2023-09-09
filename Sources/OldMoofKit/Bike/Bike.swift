@@ -68,7 +68,7 @@ public final class Bike: Codable {
 
     /// The current state of the bike.
     public var state: BikeState {
-        return self.connection.isConnected == true ? .connected : .disconnected
+        return self.connection.state == .connected ? .connected : .disconnected
     }
 
     /// The current bluetooth signal strength of the bike.
@@ -436,6 +436,24 @@ public final class Bike: Codable {
         }
     }
 
+    private func onChangedConnectionState (_ state: BluetoothState) async  {
+        switch state {
+        case .connected:
+            do {
+                try await self.setupConnection()
+                Logger.bike.info("Bike connected...")
+                self.statePublisher.send(.connected)
+            } catch {
+                self.errorPublisher.send(error)
+            }
+
+        case .disconnected:
+            self.notificationCallbacks = [:]
+            self.statePublisher.send(.disconnected)
+            Logger.bike.info("Bike disconnected...")
+        }
+    }
+
     /// Wakes the bike from it's sleep state, if required.
     ///
     /// Does nothing if the bike's `moduleState` is not `.standy`.
@@ -598,39 +616,26 @@ public final class Bike: Codable {
     /// - Throws: ``BluetoothError/unauthorized`` if the app is not authorized to use bluetooth in the app settings.
     /// - Throws: ``BluetoothError/unsupported`` if your device does not support bluetooth.
     public func connect () async throws {
-        if self.connection.isConnected {
+        if self.connection.state == .connected {
             return
         }
 
-        self.bluetoothState = self.connection.state.sink { state in
-            switch state {
-            case .connected:
-                Task {
-                    do {
-                        try await self.setupConnection()
-                        Logger.bike.info("Bike connected...")
-                        self.statePublisher.send(.connected)
-                    } catch {
-                        self.errorPublisher.send(error)
-                    }
-                }
-
-            case .disconnected:
-                self.notificationCallbacks = [:]
-                self.statePublisher.send(.disconnected)
-                Logger.bike.info("Bike disconnected...")
-            }
-        }
-
-        self.bluetoothErrors = self.connection.errors.sink { error in
+        self.bluetoothErrors = self.connection.errorPublisher.sink { error in
             self.errorPublisher.send(error)
         }
 
-        self.bluetoothNotifications = self.connection.notifications.sink { notification in
+        self.bluetoothNotifications = self.connection.notificationPublisher.sink { notification in
             self.notificationCallbacks[notification.uuid]?(notification.data)
         }
 
         try await self.connection.connect()
+        await self.onChangedConnectionState(self.connection.state)
+
+        self.bluetoothState = self.connection.statePublisher.sink { state in
+            Task {
+                await self.onChangedConnectionState(state)
+            }
+        }
     }
 
     /// Disconnects the bike.

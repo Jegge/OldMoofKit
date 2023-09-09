@@ -31,26 +31,26 @@ final class TestBike: XCTestCase {
             return self
         }
 
-        var notifications = PassthroughSubject<BluetoothNotification, Never>()
-        var errors = PassthroughSubject<Error, Never>()
-        var state = PassthroughSubject<BluetoothState, Never>()
+        var notificationPublisher = PassthroughSubject<BluetoothNotification, Never>()
+        var errorPublisher = PassthroughSubject<Error, Never>()
+        var statePublisher = PassthroughSubject<BluetoothState, Never>()
 
         var identifier: UUID = UUID(uuidString: "5d98872f-ab56-4b2c-96b5-254d45202857")!
         var reconnectInterval: TimeInterval = 0.0
-        var isConnected: Bool = false
+        var state: BluetoothState = .disconnected
 
         func connect() async throws {
-            self.isConnected = true
-            self.state.send(.connected)
+            self.state = .connected
+            self.statePublisher.send(.connected)
         }
 
         func disconnect() {
-            self.isConnected = false
-            self.state.send(.disconnected)
+            self.state = .disconnected
+            self.statePublisher.send(.disconnected)
         }
 
         func writeValue(_ data: Data, for uuid: CBUUID) async throws {
-            self.handleWriteValue?(data, uuid, self.notifications)
+            self.handleWriteValue?(data, uuid, self.notificationPublisher)
         }
 
         func readValue(for uuid: CBUUID) async throws -> Data? {
@@ -68,7 +68,6 @@ final class TestBike: XCTestCase {
     func testBikeConnection() async throws {
         let bluetooth = SmartBike2018BluetoothConnectionMock()
         var authenticated = false
-        var connected = false
         var setLight = false
         var setLock = false
         var setAlarm = false
@@ -136,7 +135,7 @@ final class TestBike: XCTestCase {
             }
         }
 
-        let bluetoothErrors = bluetooth.errors.sink { error in
+        let bluetoothErrors = bluetooth.errorPublisher.sink { error in
             XCTFail("Bluetooth error: \(error)")
         }
 
@@ -155,13 +154,8 @@ final class TestBike: XCTestCase {
             XCTFail("Bluetooth error: \(error)")
         }
 
-        let bikeState = bike.statePublisher.sink { _ in
-            connected = true
-        }
-
         XCTAssertEqual(bike.state, .disconnected)
         try await bike.connect()
-        while !connected { try await Task.sleep(nanoseconds: NSEC_PER_SEC >> 2) }
         XCTAssertEqual(bike.state, .connected)
         XCTAssertTrue(authenticated)
 

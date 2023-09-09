@@ -10,13 +10,13 @@ import Combine
 import OSLog
 
 protocol BluetoothConnectionProtocol {
-    var notifications: PassthroughSubject<BluetoothNotification, Never> { get }
-    var errors: PassthroughSubject<Error, Never> { get }
-    var state: PassthroughSubject<BluetoothState, Never> { get }
+    var notificationPublisher: PassthroughSubject<BluetoothNotification, Never> { get }
+    var errorPublisher: PassthroughSubject<Error, Never> { get }
+    var statePublisher: PassthroughSubject<BluetoothState, Never> { get }
     var identifier: UUID { get }
     var reconnectInterval: TimeInterval { get }
-    var isConnected: Bool { get }
-
+    var state: BluetoothState { get }
+    
     func connect () async throws
     func disconnect()
     func writeValue(_ data: Data, for uuid: CBUUID) async throws
@@ -36,13 +36,16 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
     private var rssiContinuation: CheckedContinuation<Int, Error>?
     private var connectContinuation: CheckedContinuation<Void, Error>?
 
-    let notifications = PassthroughSubject<BluetoothNotification, Never>()
-    let errors = PassthroughSubject<Error, Never>()
-    let state = PassthroughSubject<BluetoothState, Never>()
+    let notificationPublisher = PassthroughSubject<BluetoothNotification, Never>()
+    let errorPublisher = PassthroughSubject<Error, Never>()
+    let statePublisher = PassthroughSubject<BluetoothState, Never>()
 
     let identifier: UUID
     let reconnectInterval: TimeInterval
 
+    var state: BluetoothState {
+        return self.peripheral?.state == .connected ? .connected : .disconnected
+    }
     var isConnected: Bool {
         return self.peripheral?.state == .connected
     }
@@ -76,24 +79,24 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
             if let peripheral = self.central?.retrievePeripherals(withIdentifiers: [self.identifier]).first {
                 self.connectPeripheral(peripheral, afterDelay: .zero)
             } else {
-                self.errors.send(BluetoothError.peripheralNotFound)
+                self.errorPublisher.send(BluetoothError.peripheralNotFound)
                 self.connectContinuation?.resume(throwing: BluetoothError.peripheralNotFound)
                 self.connectContinuation = nil
             }
 
         case .poweredOff:
             self.disconnect()
-            self.errors.send(BluetoothError.poweredOff)
+            self.errorPublisher.send(BluetoothError.poweredOff)
             self.connectContinuation?.resume(throwing: BluetoothError.poweredOff)
             self.connectContinuation = nil
 
         case .unauthorized:
-            self.errors.send(BluetoothError.unauthorized)
+            self.errorPublisher.send(BluetoothError.unauthorized)
             self.connectContinuation?.resume(throwing: BluetoothError.unauthorized)
             self.connectContinuation = nil
 
         case .unsupported:
-            self.errors.send(BluetoothError.unsupported)
+            self.errorPublisher.send(BluetoothError.unsupported)
             self.connectContinuation?.resume(throwing: BluetoothError.unsupported)
             self.connectContinuation = nil
 
@@ -104,7 +107,7 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         if let error = error {
-            self.errors.send(error)
+            self.errorPublisher.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
         }
@@ -114,7 +117,7 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         if let error = error {
-            self.errors.send(error)
+            self.errorPublisher.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
         }
@@ -156,12 +159,12 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
         self.writeContinuation = nil
         self.semaphore.signal()
 
-        self.state.send(.disconnected)
+        self.statePublisher.send(.disconnected)
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let error = error {
-            self.errors.send(error)
+            self.errorPublisher.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
             return
@@ -174,7 +177,7 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error = error {
-            self.errors.send(error)
+            self.errorPublisher.send(error)
             self.connectContinuation?.resume(throwing: error)
             self.connectContinuation = nil
             return
@@ -186,7 +189,7 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
 
         let discoveredServicesCount = Set(self.characteristics.values.compactMap { $0.service?.uuid }).count
         if discoveredServicesCount == (peripheral.services?.count ?? 0) {
-            self.state.send(.connected)
+            self.statePublisher.send(.connected)
             self.connectContinuation?.resume()
             self.connectContinuation = nil
         }
@@ -209,9 +212,9 @@ class BluetoothConnection: NSObject, BluetoothConnectionProtocol, CBCentralManag
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if characteristic.isNotifying {
             if let error = error {
-                self.errors.send(error)
+                self.errorPublisher.send(error)
             } else {
-                self.notifications.send(BluetoothNotification(uuid: characteristic.uuid, data: characteristic.value))
+                self.notificationPublisher.send(BluetoothNotification(uuid: characteristic.uuid, data: characteristic.value))
             }
         } else {
             let continuation = self.readContinuation

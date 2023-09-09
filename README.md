@@ -207,7 +207,8 @@ subscription.cancel()
 
 > **Note**: When disconnecting, do not forget to cancel your subscription.
 
-Each property is complemented by a setter:
+Each property is complemented by a setter. Calling this setter transmits the value directly to the bike. The bike then will send a notification and the
+according property will get updated upon receiving that notification.
 
 ```swift
 try await bike.set(lighting: .alwaysOn)
