@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "79DC07C2-0073-495D-977C-5EB6B7B8101C",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "OldMoofKitTests",
+        "name" : "OldMoofKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}
