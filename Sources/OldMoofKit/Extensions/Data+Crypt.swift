@@ -9,19 +9,31 @@ enum CCryptError: Error {
     case alignmentError
     case decodeError
     case unimplemented
+    case overflow
+    case rngFailure
+    case unspecified
+    case callSequence
+    case keySize
+    case invalidKey
     case noResult
-    case other(code: Int32)
 
-    init (code: Int32) {
-        switch code {
-        case 0: self = .success
-        case -4300: self = .paramError
-        case -4301: self = .bufferTooSmall
-        case -4302: self = .memoryFailure
-        case -4303: self = .alignmentError
-        case -4304: self = .decodeError
-        case -4305: self = .unimplemented
-        default: self = .other(code: code)
+    // swiftlint:disable:next cyclomatic_complexity
+    init (cryptorStatus: CCCryptorStatus) {
+        switch cryptorStatus {
+        case CCCryptorStatus(kCCSuccess): self = .success
+        case CCCryptorStatus(kCCParamError): self = .paramError
+        case CCCryptorStatus(kCCBufferTooSmall): self = .bufferTooSmall
+        case CCCryptorStatus(kCCMemoryFailure): self = .memoryFailure
+        case CCCryptorStatus(kCCAlignmentError): self = .alignmentError
+        case CCCryptorStatus(kCCDecodeError): self = .decodeError
+        case CCCryptorStatus(kCCUnimplemented): self = .unimplemented
+        case CCCryptorStatus(kCCOverflow): self = .overflow
+        case CCCryptorStatus(kCCRNGFailure): self = .rngFailure
+        case CCCryptorStatus(kCCUnspecifiedError): self = .unspecified
+        case CCCryptorStatus(kCCCallSequenceError): self = .callSequence
+        case CCCryptorStatus(kCCKeySizeError): self = .keySize
+        case CCCryptorStatus(kCCInvalidKey): self = .invalidKey
+        default: self = .unspecified
         }
     }
 }
@@ -51,7 +63,7 @@ extension Data {
             }
         }
         if status != kCCSuccess {
-            throw CCryptError(code: status)
+            throw CCryptError(cryptorStatus: status)
         }
         if result == nil {
             throw CCryptError.noResult
@@ -62,17 +74,17 @@ extension Data {
     func encrypt_aes_ecb_zero(key: Data) throws -> Data {
         let padding = ((self.count + kCCBlockSizeAES128 - 1) / kCCBlockSizeAES128) * kCCBlockSizeAES128
         return try crypt(operation: CCOperation(kCCEncrypt),
-                     algorithm: CCAlgorithm(kCCAlgorithmAES),
-                         options: CCOptions(kCCOptionECBMode),
-                           key: key,
-                           data: self.pad(length: padding))
+                         algorithm: CCAlgorithm(kCCAlgorithmAES),
+                           options: CCOptions(kCCOptionECBMode),
+                               key: key,
+                              data: self.pad(length: padding))
     }
 
     func decrypt_aes_ecb_zero(key: Data) throws -> Data {
         return try crypt(operation: CCOperation(kCCDecrypt),
-                     algorithm: CCAlgorithm(kCCAlgorithmAES),
-                       options: CCOptions(kCCOptionECBMode),
-                           key: key,
-                          data: self)
+                         algorithm: CCAlgorithm(kCCAlgorithmAES),
+                           options: CCOptions(kCCOptionECBMode),
+                               key: key,
+                              data: self)
     }
 }

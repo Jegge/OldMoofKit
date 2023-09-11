@@ -8,7 +8,7 @@ extension Data {
         while index < hexString.endIndex {
             if hexString[index].isWhitespace {
                 index = hexString.index(after: index)
-            } else if "0123456789abcdefABCDEF".contains(hexString[index]) {
+            } else if index < hexString.index(before: hexString.endIndex) && "0123456789abcdefABCDEF".contains(hexString[index]) {
                 let byte = hexString[index...hexString.index(after: index)]
                 guard var value = UInt8(byte, radix: 16) else {
                     return nil
