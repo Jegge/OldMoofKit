@@ -155,7 +155,7 @@ subscription.cancel()
 
 ## Errors
 
-The bike has a dedicated `errorPublisher`, that you can subscripe to to get error messages.
+The bike has a dedicated `errorPublisher`, that you can subscribe to to get error messages.
 
 ```swift
 let subscription: AnyCancellable = bike.errorPublisher.receive(on: RunLoop.main).sink { error in
