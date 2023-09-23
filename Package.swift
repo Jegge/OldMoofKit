@@ -6,13 +6,13 @@ import PackageDescription
 let package = Package(
     name: "OldMoofKit",
     platforms: [
-        .macOS(.v11), .iOS(.v14),
+        .macOS(.v11), .iOS(.v14)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "OldMoofKit",
-            targets: ["OldMoofKit"]),
+            targets: ["OldMoofKit"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
