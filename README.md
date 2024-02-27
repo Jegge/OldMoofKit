@@ -1,3 +1,5 @@
+[![Tested on GitHub Actions](https://github.com/Jegge/OldMoofKit/actions/workflows/swift.yml/badge.svg)](https://github.com/Jegge/OldMoofKit/actions/workflows/swift.yml)
+[![](https://www.codefactor.io/repository/github/Jegge/OldMoofKit/badge)](https://www.codefactor.io/repository/github/Jegge/OldMoofKit)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FJegge%2FOldMoofKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Jegge/OldMoofKit)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FJegge%2FOldMoofKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Jegge/OldMoofKit)
 ![GitHub](https://img.shields.io/github/license/Jegge/OldMoofKit)
@@ -154,7 +156,7 @@ subscription.cancel()
 
 ## Errors
 
-The bike has a dedicated `errorPublisher`, that you can subscripe to to get error messages.
+The bike has a dedicated `errorPublisher`, that you can subscribe to to get error messages.
 
 ```swift
 let subscription: AnyCancellable = bike.errorPublisher.receive(on: RunLoop.main).sink { error in
