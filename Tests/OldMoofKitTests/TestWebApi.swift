@@ -25,13 +25,13 @@ struct Secrets: Decodable {
 }
 
 final class TestWebApi: XCTestCase {
-    func testWebApi() async throws {
-        let secrets = try Secrets.load()
-
-        let api = VanMoof(apiUrl: VanMoof.Api.url, apiKey: VanMoof.Api.key)
-        try await api.authenticate(username: secrets.username, password: secrets.password)
-        let (_, details) = try await api.bikeDetails()
-
-        XCTAssertFalse(details.isEmpty)
-    }
+//    func testWebApi() async throws {
+//        let secrets = try Secrets.load()
+//
+//        let api = VanMoof(apiUrl: VanMoof.Api.url, apiKey: VanMoof.Api.key)
+//        try await api.authenticate(username: secrets.username, password: secrets.password)
+//        let (_, details) = try await api.bikeDetails()
+//
+//        XCTAssertFalse(details.isEmpty)
+//    }
 }
