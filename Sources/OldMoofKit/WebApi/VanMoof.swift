@@ -114,7 +114,17 @@ public class VanMoof {
             throw VanMoofError.notAuthenticated
         }
 
-        var request = URLRequest(url: self.apiUrl.appendingPathComponent("getCustomerData?includeBikeDetails"))
+        guard var components = URLComponents(url: self.apiUrl.appendingPathComponent("getCustomerData"), resolvingAgainstBaseURL: true) else {
+            throw VanMoofError.invalidUrl
+        }
+
+        components.queryItems = [ URLQueryItem(name: "includeBikeDetails", value: nil) ]
+
+        guard let url = components.url else {
+            throw VanMoofError.invalidUrl
+        }
+
+        var request = URLRequest(url: url)
         request.setValue( "Bearer \(self.token)", forHTTPHeaderField: "Authorization")
         request.setValue(self.apiKey, forHTTPHeaderField: "Api-Key")
         request.httpMethod  = "GET"

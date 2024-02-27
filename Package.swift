@@ -29,7 +29,10 @@ let package = Package(
         ),
         .testTarget(
                name: "OldMoofKitTests",
-               dependencies: ["OldMoofKit"]
+               dependencies: ["OldMoofKit"],
+               resources: [
+                    .copy("secrets.json")
+               ]
         )
     ]
 )

@@ -21,6 +21,8 @@ public enum VanMoofError: Error {
     case unauthorized
     /// The api query yielded no supported bikes.
     case noSupportedBikesFound
+    /// The given url was invalid
+    case invalidUrl
 }
 
 extension VanMoofError: LocalizedError {
@@ -38,6 +40,8 @@ extension VanMoofError: LocalizedError {
             return String(format: NSLocalizedString("Did not find expected element '%@' in JSON data.", comment: "Error description: expected element"), element)
         case .invalidStatusCode(let code):
             return String(format: NSLocalizedString("Did receive HTTP unexpected status code %@.", comment: "Error description: expected element"), code)
+        case .invalidUrl:
+            return NSLocalizedString("The web api URL was malformed or invalid.", comment: "invalid api url")
         }
     }
 }
