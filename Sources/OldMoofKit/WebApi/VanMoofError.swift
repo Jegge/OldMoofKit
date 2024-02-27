@@ -39,7 +39,7 @@ extension VanMoofError: LocalizedError {
         case .expected(let element):
             return String(format: NSLocalizedString("Did not find expected element '%@' in JSON data.", comment: "Error description: expected element"), element)
         case .invalidStatusCode(let code):
-            return String(format: NSLocalizedString("Did receive HTTP unexpected status code %@.", comment: "Error description: expected element"), code)
+            return String(format: NSLocalizedString("Did receive HTTP unexpected status code %d.", comment: "Error description: expected element"), code)
         case .invalidUrl:
             return NSLocalizedString("The web api URL was malformed or invalid.", comment: "invalid api url")
         }
