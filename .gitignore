@@ -12,4 +12,4 @@ xcuserdata/
 .DS_Store
 xcshareddata/
 
-secrets.json
+Secrets.swift
