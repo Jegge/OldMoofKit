@@ -13,9 +13,6 @@
   },
   "testTargets" : [
     {
-      "skippedTests" : [
-        "TestWebApi\/testWebApi()"
-      ],
       "target" : {
         "containerPath" : "container:",
         "identifier" : "OldMoofKitTests",
