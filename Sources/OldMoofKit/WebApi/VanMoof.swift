@@ -65,7 +65,7 @@ public class VanMoof {
 
         let authorization = Data("\(username):\(password)".utf8).base64EncodedString()
 
-        var request = URLRequest(url: self.apiUrl.appendingPathComponent("authenticate"))
+        var request = URLRequest(url: self.apiUrl.authenticate())
         request.setValue("Basic \(authorization)", forHTTPHeaderField: "Authorization")
         request.setValue(self.apiKey, forHTTPHeaderField: "Api-Key")
         request.httpMethod  = "POST"
@@ -114,17 +114,7 @@ public class VanMoof {
             throw VanMoofError.notAuthenticated
         }
 
-        guard var components = URLComponents(url: self.apiUrl.appendingPathComponent("getCustomerData"), resolvingAgainstBaseURL: true) else {
-            throw VanMoofError.invalidUrl
-        }
-
-        components.queryItems = [ URLQueryItem(name: "includeBikeDetails", value: nil) ]
-
-        guard let url = components.url else {
-            throw VanMoofError.invalidUrl
-        }
-
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: try self.apiUrl.bikeDetails())
         request.setValue( "Bearer \(self.token)", forHTTPHeaderField: "Authorization")
         request.setValue(self.apiKey, forHTTPHeaderField: "Api-Key")
         request.httpMethod  = "GET"
@@ -251,5 +241,33 @@ extension Bike {
             throw VanMoofError.noSupportedBikesFound
         }
         try await self.init(scanningForBikeMatchingDetails: details)
+    }
+}
+
+fileprivate extension URL {
+    func authenticate () -> URL {
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+            return self.appending(path: "authenticate")
+        } else {
+            return self.appendingPathComponent("authenticate")
+        }
+    }
+
+    func bikeDetails () throws -> URL {
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+            return self.appending(path: "getCustomerData").appending(queryItems: [ URLQueryItem(name: "includeBikeDetails", value: nil)])
+        } else {
+            guard var components = URLComponents(url: self.appendingPathComponent("getCustomerData"), resolvingAgainstBaseURL: true) else {
+                throw VanMoofError.invalidUrl
+            }
+
+            components.queryItems = [ URLQueryItem(name: "includeBikeDetails", value: nil) ]
+
+            guard let url = components.url else {
+                throw VanMoofError.invalidUrl
+            }
+
+            return url
+        }
     }
 }
