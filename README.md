@@ -43,6 +43,8 @@ Electrified S/X | :white_check_mark: |  :x:                | [vanbike-lib](https
 S/X 2           | :white_check_mark: |  :white_check_mark: | [vanbike-lib](https://github.com/Poket-Jony/vanbike-lib/tree/main)
 S/X 3           | :x:                |  :x:                | [VanMoofKit](https://github.com/SvenTiigi/VanMoofKit), [PyMoof](https://github.com/quantsini/pymoof/tree/main)
 
+*Not tested* means that it should work in theory, but since I could not lay may hands on such a bike this is a bit of an uncharted territory. Should you own a SmartBike or a Electified S/X I would appreciate if you could confirm that OldMoofKit works, or else help me debug the issue.
+
 ## Installation
 
 ### Swift Package Manager
@@ -76,7 +78,7 @@ To initially get a bike, connect to the VanMoof web api and retrieve the first b
 let bike = try await Bike(username: "Johnny Mnemonic", password: "swordfish")
 ```
 
-If you own several bikes, you need to download the details separately.
+If you own several bikes, you need to download the details separately. You may then scan your surroundings via bluetooth for a bike matching these details.
 
 ```swift
 var api = VanMoof(apiUrl: VanMoof.Api.url, apiKey: VanMoof.Api.key)
@@ -88,7 +90,7 @@ let bike = try await Bike(scanningForBikeMatchingDetails: details)
 
 ### Manually from details
 
-If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually.
+If you already have your bike details, e.g. because you have downloaded them earlier from the VanMoof site, you can construct the bike details manually. You may then scan your surroundings via bluetooth for a bike matching these details.
 
 ```swift
 let details = try BikeDetails(bleProfile: .smartbike2016, macAddress: "12:34:56:78:9A:BC", encryptionKey: "00112233445566778899aabbccddeeff")
@@ -140,7 +142,7 @@ switch state {
 }
 ```
 
-You may also subscribe ot the `statePublisher` and be informed when the current state changes.
+You may also subscribe to the `statePublisher` and be informed when the current state changes.
 
 ```swift
 let subscription: AnyCancellable = bike.statePublisher.receive(on: RunLoop.main).sink { state in
